@@ -88,24 +88,10 @@ def baseline_answer(question: str) -> str:
     return response.content
 
 
-def get_multi_agent_answer(question: str) -> str:
-    """Multi-agent pipeline with specialist routing + graph context.
-    Skips citation validator for faster interactive response."""
-    from multi_agent_rag import classify_query, factual_agent, \
-        cross_jurisdiction_agent, temporal_agent, compliance_agent
-
-    classification = classify_query(question)
-    category = classification["category"]
-    cities = classification["cities"]
-
-    if category == "cross_jurisdiction":
-        return cross_jurisdiction_agent(question, cities)
-    elif category == "temporal":
-        return temporal_agent(question, cities)
-    elif category == "compliance":
-        return compliance_agent(question, cities)
-    else:
-        return factual_agent(question, cities)
+def stream_multi_agent(question: str):
+    """Streaming multi-agent pipeline -- yields tokens as they generate."""
+    from multi_agent_rag import stream_multi_agent_answer
+    yield from stream_multi_agent_answer(question)
 
 
 ### SIDEBAR ###
@@ -179,21 +165,22 @@ if user_question:
         st.markdown(user_question)
 
     with st.chat_message("assistant"):
-        with st.spinner("Searching knowledge base..." if mode != "Multi-Agent RAG"
-                        else "Classifying query and routing to specialist agent..."):
-            t0 = time.time()
-            try:
-                if mode == "Multi-Agent RAG":
-                    answer = get_multi_agent_answer(user_question)
-                else:
+        t0 = time.time()
+        try:
+            if mode == "Multi-Agent RAG":
+                # Streaming: tokens appear as they generate
+                answer = st.write_stream(stream_multi_agent(user_question))
+            else:
+                with st.spinner("Searching knowledge base..."):
                     answer = baseline_answer(user_question)
-                elapsed = time.time() - t0
-                meta = f"{mode_label} | {elapsed:.1f}s"
-            except Exception as e:
-                answer = f"Error: {e}"
-                meta = f"{mode_label} | error"
+                st.markdown(answer)
+            elapsed = time.time() - t0
+            meta = f"{mode_label} | {elapsed:.1f}s"
+        except Exception as e:
+            answer = f"Error: {e}"
+            meta = f"{mode_label} | error"
+            st.markdown(answer)
 
-        st.markdown(answer)
         st.caption(meta)
 
     st.session_state.messages.append({

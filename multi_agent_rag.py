@@ -48,7 +48,8 @@ def normalize_city(name: str) -> str:
 
 embeddings = OpenAIEmbeddings(model="text-embedding-3-large", api_key=OPENAI_KEY)
 classifier_llm = ChatOpenAI(model="gpt-4o-mini", temperature=0, api_key=OPENAI_KEY)
-answer_llm = ChatOpenAI(model="gpt-4o", temperature=0, api_key=OPENAI_KEY)
+answer_llm = ChatOpenAI(model="gpt-4o-mini", temperature=0, api_key=OPENAI_KEY)
+answer_llm_streaming = ChatOpenAI(model="gpt-4o-mini", temperature=0, api_key=OPENAI_KEY, streaming=True)
 
 
 # ─── Retrieval Helpers ────────────────────────────────────────────────────────
@@ -534,3 +535,153 @@ if __name__ == "__main__":
 
     answer = multi_agent_answer(question)
     print(answer)
+
+
+# ─── Streaming Pipeline ─────────────────────────────────────────────────────
+
+
+def _build_prompt_for_agent(question: str, category: str, cities: list) -> tuple[str, list]:
+    """Build the LLM prompt and collect chunks for a given question category.
+    Returns (prompt_string, chunks_list)."""
+    if category == "cross_jurisdiction":
+        if not cities:
+            cities_response = classifier_llm.invoke(
+                f"Which cities are being compared? List city names only, comma-separated.\n"
+                f"Question: {question}\n"
+                f"Available: Los Angeles, San Diego, Phoenix, Henderson, Irvine, Reno, Santa Clarita, Scottsdale, Atlanta\n"
+                f"Answer:"
+            )
+            for name in cities_response.content.split(","):
+                detected = detect_cities(name.strip())
+                cities.extend(detected)
+
+        graph_text = graph_retrieve(question, cities=cities)
+        city_contexts = []
+        all_chunks = []
+        for city in cities[:3]:
+            chunks = vector_search(question, top_k=4, city_filter=city)
+            all_chunks.extend(chunks)
+            city_contexts.append(chunks_to_context(chunks, label=city))
+        if len(cities) < 2:
+            general = vector_search(question, top_k=6)
+            all_chunks.extend(general)
+            city_contexts.append(chunks_to_context(general, label="All Cities"))
+        combined = "\n\n".join(city_contexts)
+
+        prompt = (
+            "You are a building code expert comparing amendments across US cities.\n\n"
+            "RULES:\n"
+            "- Base your answer on the KNOWLEDGE GRAPH DATA and RETRIEVED PASSAGES below.\n"
+            "- Do NOT fabricate section numbers, ordinance numbers, or code requirements.\n"
+            "- If the context contains relevant information, extract and present it.\n"
+            "- Use graph data for structural facts (base codes, timelines, profiles) even if passages are sparse.\n\n"
+            "Instructions:\n"
+            "1. Use the KNOWLEDGE GRAPH DATA for city profiles, base codes, and adoption timelines\n"
+            "2. Use the RETRIEVED PASSAGES for specific code section content and amendments\n"
+            "3. For EACH city mentioned, describe their specific requirements from the evidence\n"
+            "4. Highlight KEY DIFFERENCES between cities\n"
+            "5. Cite specific section numbers and amendment sources\n"
+            "6. If information for a city is limited, state what you found and what is missing\n\n"
+            f"KNOWLEDGE GRAPH DATA:\n{graph_text}\n\n"
+            f"RETRIEVED PASSAGES (per-city):\n{combined}\n\n"
+            f"Question: {question}"
+        )
+        return prompt, all_chunks
+
+    elif category == "temporal":
+        graph_text = graph_retrieve(question, cities=cities)
+        years = re.findall(r"20[12]\d", question)
+        contexts = []
+        all_chunks = []
+        if years:
+            for year in years[:3]:
+                chunks = vector_search(f"{question} {year}", top_k=4)
+                all_chunks.extend(chunks)
+                contexts.append(chunks_to_context(chunks, label=f"Year {year}"))
+        else:
+            chunks = vector_search(question, top_k=8)
+            all_chunks.extend(chunks)
+            contexts.append(chunks_to_context(chunks, label="Timeline"))
+        combined = "\n\n".join(contexts)
+
+        prompt = (
+            "You are a building code expert analyzing how codes have changed over time.\n\n"
+            "RULES:\n"
+            "- Base your answer on the KNOWLEDGE GRAPH DATA and RETRIEVED PASSAGES below.\n"
+            "- Do NOT fabricate dates, edition numbers, or adoption timelines.\n"
+            "- Use graph data for timeline facts even if passages provide limited detail.\n\n"
+            "Instructions:\n"
+            "1. Use the KNOWLEDGE GRAPH DATA for the official adoption timeline and code editions\n"
+            "2. Use the RETRIEVED PASSAGES for specific amendment content and section details\n"
+            "3. Present information chronologically\n"
+            "4. Highlight what CHANGED between editions/years based on evidence\n"
+            "5. Cite specific ordinance numbers and amendment dates\n"
+            "6. If only partial data is available, present what you have and note gaps\n\n"
+            f"KNOWLEDGE GRAPH DATA:\n{graph_text}\n\n"
+            f"RETRIEVED PASSAGES:\n{combined}\n\n"
+            f"Question: {question}"
+        )
+        return prompt, all_chunks
+
+    elif category == "compliance":
+        sub_queries_response = classifier_llm.invoke(
+            f"Break this compliance question into 2-3 specific sub-questions.\n"
+            f"Question: {question}\nRespond with sub-questions, one per line."
+        )
+        sub_queries = [q.strip().lstrip("0123456789.-) ") for q in sub_queries_response.content.strip().split("\n") if q.strip()]
+        all_chunks = []
+        for sq in sub_queries[:3]:
+            chunks = vector_search(sq, top_k=3, city_filter=cities[0] if cities else None)
+            all_chunks.extend(chunks)
+        seen = set()
+        unique = [c for c in all_chunks if c.get("content", "")[:100] not in seen and not seen.add(c.get("content", "")[:100])]
+        context = chunks_to_context(unique[:8])
+
+        prompt = (
+            "You are a building code compliance expert.\n\n"
+            "RULES:\n"
+            "- Base your answer on the context below. Do NOT fabricate code sections or requirements.\n"
+            "- If the context contains relevant information, extract and present it.\n"
+            "- If the context only covers some conditions, answer what you can and note the gaps.\n\n"
+            f"Context:\n{context}\n\n"
+            f"Question: {question}"
+        )
+        return prompt, unique[:8]
+
+    else:  # factual
+        city_filter = cities[0] if cities else None
+        chunks = vector_search(question, top_k=5, city_filter=city_filter)
+        context = chunks_to_context(chunks)
+
+        prompt = (
+            "You are a building code expert. Answer this factual question using the provided context.\n\n"
+            "RULES:\n"
+            "- Base your answer on the context below. Cite specific section numbers and source documents.\n"
+            "- If the context contains relevant information, extract and present it even if it only partially answers the question.\n"
+            "- If a table in the context contains the data needed, read and cite the specific values.\n"
+            "- Do NOT fabricate section numbers or requirements not present in the context.\n"
+            "- Only say you cannot answer if the context is truly unrelated to the question.\n\n"
+            f"Context:\n{context}\n\n"
+            f"Question: {question}"
+        )
+        return prompt, chunks
+
+
+def stream_multi_agent_answer(question: str):
+    """Streaming version: yields tokens as they generate.
+
+    Usage in Streamlit:
+        st.write_stream(stream_multi_agent_answer(question))
+    """
+    # Step 1: Classify (fast, non-streaming)
+    classification = classify_query(question)
+    category = classification["category"]
+    cities = classification["cities"]
+
+    # Step 2: Build prompt with retrieval (non-streaming)
+    prompt, _ = _build_prompt_for_agent(question, category, cities)
+
+    # Step 3: Stream the answer
+    for chunk in answer_llm_streaming.stream(prompt):
+        if chunk.content:
+            yield chunk.content
