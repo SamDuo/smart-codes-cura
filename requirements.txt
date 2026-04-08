@@ -1,0 +1,14 @@
+streamlit
+langchain
+langchain-core
+langchain-openai
+langchain-community
+langsmith
+httpx
+numpy
+scipy
+pdfplumber
+neo4j
+folium
+streamlit-folium
+python-dotenv
