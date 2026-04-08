@@ -75,7 +75,7 @@ class SemanticCache:
 
     def load_seed(self, seed_path: str) -> int:
         """Load pre-computed demo answers from JSON file."""
-        if not os.path.exists(seed_path):
+        if not os.path.exists(seed_path) or os.path.getsize(seed_path) == 0:
             return 0
 
         with open(seed_path, "r", encoding="utf-8") as f:
