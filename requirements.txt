@@ -12,3 +12,4 @@ neo4j
 folium
 streamlit-folium
 python-dotenv
+supabase
