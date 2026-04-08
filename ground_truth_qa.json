@@ -1,0 +1,869 @@
+[
+  {
+    "question": "What is the fire-resistance rating for Group F-2 buildings according to the Los Angeles City Building Code 2019?",
+    "answer": "The fire-resistance rating for Group F-2 buildings is 2 hours.",
+    "facts": [
+      "fire-resistance rating",
+      "Group F-2",
+      "2 hours"
+    ],
+    "citations": [
+      "Table"
+    ],
+    "source": "Chapter 7 Fire and Smoke Protection Features_ Los Angeles City Building Code 2019 (Vol 1 & 2) _ UpCodes.pdf",
+    "city": "unknown",
+    "retrieval_query": "fire resistance rating construction type table",
+    "similarity": 0.683905108906076
+  },
+  {
+    "question": "What is the maximum fire-resistance rating required for shaft enclosures?",
+    "answer": "Shaft enclosures shall have a fire-resistance rating not less than the floor assembly penetrated, but need not exceed 2 hours.",
+    "facts": [
+      "shaft enclosures",
+      "fire-resistance rating",
+      "2 hours"
+    ],
+    "citations": [
+      "Section 713.5"
+    ],
+    "source": "Chapter 7 Fire and Smoke Protection Features_ Los Angeles City Building Code 2019 (Vol 1 & 2) _ UpCodes.pdf",
+    "city": "Los Angeles",
+    "retrieval_query": "fire barrier requirements shaft enclosure section 713",
+    "similarity": 0.786205553434439
+  },
+  {
+    "question": "What are the requirements for fire alarm systems in buildings three or more stories in height?",
+    "answer": "A fire alarm system shall be installed throughout all buildings three or more stories in height. Exception: Group R-3 occupancies and single-family dwellings built under the IRC.",
+    "facts": [
+      "fire alarm system",
+      "three or more stories",
+      "Group R-3 exception"
+    ],
+    "citations": [
+      "Section 907.2.13.1"
+    ],
+    "source": "2021_BC.pdf",
+    "city": "Henderson",
+    "retrieval_query": "fire alarm system requirements occupancy group",
+    "similarity": 0.639896433356513
+  },
+  {
+    "question": "What is the minimum fire-resistance rating for exterior walls with a fire separation distance of 0 feet?",
+    "answer": "The minimum fire-resistance rating for exterior walls with a fire separation distance of 0 feet is 1 hour, tested in accordance with ASTM E119 or UL 263 or Section 703.2.2 of the International Building Code with exposure from both sides.",
+    "facts": [
+      "fire-resistance rating",
+      "0 feet",
+      "1 hour"
+    ],
+    "citations": [
+      "Table"
+    ],
+    "source": "2024_RC.pdf",
+    "city": "Henderson",
+    "retrieval_query": "fire separation distance exterior walls openings",
+    "similarity": 0.665224830223611
+  },
+  {
+    "question": "When is an automatic sprinkler system not required for additions or alterations to existing townhouses in Irvine?",
+    "answer": "An automatic sprinkler system shall not be required where additions or alterations are made to existing townhouses that do not have an automatic sprinkler system installed except when the floor area of such additions or alterations within any two-year period exceeds 50 percent of the initial existing gross floor area and the final gross floor area exceeds 5,500 square feet.",
+    "facts": [
+      "automatic sprinkler system",
+      "additions or alterations",
+      "existing townhouses"
+    ],
+    "citations": [
+      "Section R309.2"
+    ],
+    "source": "2025_Whole.pdf",
+    "city": "Irvine",
+    "retrieval_query": "sprinkler system requirements exceptions",
+    "similarity": 0.625066041946429
+  },
+  {
+    "question": "What is the minimum clear width required for an egress door in a dwelling unit?",
+    "answer": "The egress door shall provide a minimum clear width of 32 inches (813 mm).",
+    "facts": [
+      "egress door",
+      "minimum clear width",
+      "32 inches"
+    ],
+    "citations": [
+      "Section 91.5.311.2"
+    ],
+    "source": "2011_RC.pdf",
+    "city": "LosAngeles",
+    "retrieval_query": "means of egress corridor width requirements",
+    "similarity": 0.585859782767918
+  },
+  {
+    "question": "What is the maximum response modification coefficient (R) for bearing wall and building frame systems in seismic design?",
+    "answer": "The response modification coefficient (R) shall not exceed 5 for bearing wall and building frame systems.",
+    "facts": [
+      "response modification coefficient",
+      "bearing wall",
+      "building frame systems"
+    ],
+    "citations": [
+      "Section 1613.11.9.2",
+      "Section 1613.7.9.2",
+      "Section 1613.8.9.2"
+    ],
+    "source": "2016_Whole.pdf",
+    "city": "SantaClarita",
+    "retrieval_query": "seismic design lateral force requirements",
+    "similarity": 0.662489076330933
+  },
+  {
+    "question": "What are the load combinations for strength design or load and resistance factor design according to the Los Angeles City Building Code 2019?",
+    "answer": "Where strength design or load and resistance factor design is used, buildings and other structures, and portions thereof, shall be designed to resist the most critical effects resulting from the following combinations of factored loads: 1.4(D + F) (Equation 16A-1) and 1.2(D + F) + 1.6(L + H) + 0.5(Lr or S or R).",
+    "facts": [
+      "strength design",
+      "load combinations",
+      "factored loads"
+    ],
+    "citations": [
+      "Section 1605A.2"
+    ],
+    "source": "Chapter 16A Structural Design_ Los Angeles City Building Code 2019 (Vol 1 & 2) _ UpCodes.pdf",
+    "city": "unknown",
+    "retrieval_query": "structural design load combinations",
+    "similarity": 0.72931763283225
+  },
+  {
+    "question": "How are wind loads on buildings determined according to the Los Angeles City Building Code 2019?",
+    "answer": "Wind loads on every building or structure shall be determined in accordance with Chapters 26 to 30 of ASCE 7.",
+    "facts": [
+      "wind loads",
+      "ASCE 7",
+      "buildings"
+    ],
+    "citations": [
+      "Section 1609A.1.1"
+    ],
+    "source": "Chapter 16A Structural Design_ Los Angeles City Building Code 2019 (Vol 1 & 2) _ UpCodes.pdf",
+    "city": "Los Angeles",
+    "retrieval_query": "wind load design requirements",
+    "similarity": 0.625937342643738
+  },
+  {
+    "question": "What is the maximum cross slope allowed for curb ramps and blended transitions?",
+    "answer": "The cross slope of curb ramps and blended transitions shall be 1:48 maximum.",
+    "facts": [
+      "cross slope",
+      "curb ramps",
+      "1:48 maximum"
+    ],
+    "citations": [
+      "Section 11B-406.5.7"
+    ],
+    "source": "Chapter 11B Accessibility to Public Buildings, Public Accommodations, Commercial Buildings and Public Housing_ Los Angeles City _b511bb31.pdf",
+    "city": "unknown",
+    "retrieval_query": "ramp slope requirements accessibility",
+    "similarity": 0.671668011744539
+  },
+  {
+    "question": "What is the minimum number of accessible parking spaces required for a facility with 76 to 100 total parking spaces?",
+    "answer": "4",
+    "facts": [
+      "accessible parking spaces",
+      "76 to 100",
+      "minimum number"
+    ],
+    "citations": [
+      "Table"
+    ],
+    "source": "Chapter 11B Accessibility to Public Buildings, Public Accommodations, Commercial Buildings and Public Housing_ Los Angeles City _b511bb31.pdf",
+    "city": "unknown",
+    "retrieval_query": "parking accessible spaces requirements",
+    "similarity": 0.661947648293065
+  },
+  {
+    "question": "What is required for compliance with reduced seismic loads according to the text?",
+    "answer": "Compliance with ASCE 41, using the performance objective in CEBC Table 303.3.2 for the applicable risk category, shall be deemed to meet the requirements of reduced seismic loads.",
+    "facts": [
+      "ASCE 41",
+      "CEBC Table 303.3.2",
+      "reduced seismic loads"
+    ],
+    "citations": [
+      "CEBC Section 503",
+      "CEBC Table 303.3.2"
+    ],
+    "source": "2026_Whole.pdf",
+    "city": "LosAngeles",
+    "retrieval_query": "earthquake hazard reduction existing buildings",
+    "similarity": 0.613167581495826
+  },
+  {
+    "question": "What materials are permitted for balconies on buildings of Types I and II construction?",
+    "answer": "Fire-retardant-treated wood is permitted for balconies, porches, decks, and exterior stairways not used as required exits on buildings of Types I and II construction, three stories or less above grade plane.",
+    "facts": [
+      "fire-retardant-treated wood",
+      "Types I and II construction",
+      "balconies"
+    ],
+    "citations": [
+      "Chapter 7",
+      "Section 701A.3"
+    ],
+    "source": "2019_Whole.pdf",
+    "city": "Irvine",
+    "retrieval_query": "wildfire exposure construction exterior materials",
+    "similarity": 0.562400311279164
+  },
+  {
+    "question": "When did the City of Santa Clarita Energy Conservation Code become effective for new building permit applications?",
+    "answer": "The City of Santa Clarita Energy Conservation Code shall become effective for new building permit applications received by the City on or after January 1, 2017.",
+    "facts": [
+      "Santa Clarita",
+      "Energy Conservation Code",
+      "January 1, 2017"
+    ],
+    "citations": [
+      "2013_Whole.pdf"
+    ],
+    "source": "2013_Whole.pdf",
+    "city": "SantaClarita",
+    "retrieval_query": "energy conservation requirements new construction",
+    "similarity": 0.597646284384017
+  },
+  {
+    "question": "What are the requirements for Fire Department Connections (FDC) according to the revised NFPA 13, 2010 Edition in Irvine's building code?",
+    "answer": "Fire Department Connections (FDC) shall be of an approved type, contain a minimum of two 2.5 inch inlets, and be located no more than 150 feet from a public hydrant.",
+    "facts": [
+      "Fire Department Connections",
+      "two 2.5 inch inlets",
+      "150 feet from a public hydrant"
+    ],
+    "citations": [
+      "Section 6.8.3"
+    ],
+    "source": "2022_Whole.pdf",
+    "city": "Irvine",
+    "retrieval_query": "fire district regulations requirements",
+    "similarity": 0.574409025144846
+  },
+  {
+    "question": "What version of the International Building Code does the City of Henderson adopt in Ordinance No. 3040?",
+    "answer": "The City of Henderson adopts the 2012 version of the International Building Code.",
+    "facts": [
+      "2012 version",
+      "International Building Code",
+      "City of Henderson"
+    ],
+    "citations": [
+      "Ordinance No. 3040",
+      "HMC Chapter 15.08"
+    ],
+    "source": "2013_BC.pdf",
+    "city": "Henderson",
+    "retrieval_query": "Henderson Nevada amendment international building code",
+    "similarity": 0.747261792094922
+  },
+  {
+    "question": "Are automatic sprinkler systems required in townhouses according to Section R309.1?",
+    "answer": "An automatic sprinkler system shall be installed in townhouses.",
+    "facts": [
+      "automatic sprinkler system",
+      "installed",
+      "townhouses"
+    ],
+    "citations": [
+      "Section R309.1"
+    ],
+    "source": "2024_Whole.pdf",
+    "city": "Reno",
+    "retrieval_query": "Henderson residential code amendment sprinkler",
+    "similarity": 0.66489565340799
+  },
+  {
+    "question": "What version of the International Building Code is adopted in the Henderson Municipal Code Chapter 15.08?",
+    "answer": "The 2012 version of the International Building Code is adopted in the Henderson Municipal Code Chapter 15.08.",
+    "facts": [
+      "2012 International Building Code",
+      "Henderson Municipal Code",
+      "Chapter 15.08"
+    ],
+    "citations": [
+      "ORDINANCE NO. 3040"
+    ],
+    "source": "2013_BC.pdf",
+    "city": "Henderson",
+    "retrieval_query": "Henderson Las Vegas amendments 2021 IBC",
+    "similarity": 0.716771666714999
+  },
+  {
+    "question": "What chapters of Division 9 of Section 5 are amended by City Council Ordinance No. 13-06?",
+    "answer": "Chapters 1, 2, 3, and 4 of Division 9 of Section 5 are amended by City Council Ordinance No. 13-06.",
+    "facts": [
+      "Chapters 1, 2, 3, and 4",
+      "Division 9",
+      "Section 5"
+    ],
+    "citations": [
+      "CITY COUNCIL ORDINANCE NO. 13-06"
+    ],
+    "source": "2025_Whole.pdf",
+    "city": "Irvine",
+    "retrieval_query": "Irvine city council ordinance building standards code",
+    "similarity": 0.775282713804568
+  },
+  {
+    "question": "What fire code has the City of Irvine adopted for regulating conditions hazardous to life and property from fire or explosion?",
+    "answer": "The City of Irvine has adopted the California Fire Code (CFC), 2013 edition with errata (Title 24, Part 9, California Code of Regulations), and the 2012 International Fire Code published by the International Code Council.",
+    "facts": [
+      "California Fire Code",
+      "2013 edition",
+      "International Fire Code"
+    ],
+    "citations": [
+      "Section 5-9-102"
+    ],
+    "source": "2025_Whole.pdf",
+    "city": "Irvine",
+    "retrieval_query": "Irvine municipal code building standards",
+    "similarity": 0.741619258119972
+  },
+  {
+    "question": "What is the scope of the building codes as amended in the City of Irvine?",
+    "answer": "The provisions of these codes shall apply to and affect all of the territory of the City of Irvine, except encroachments and public works located primarily in a public way; public utility towers.",
+    "facts": [
+      "scope",
+      "territory",
+      "City of Irvine"
+    ],
+    "citations": [
+      "Section 5-9-202"
+    ],
+    "source": "2025_Whole.pdf",
+    "city": "Irvine",
+    "retrieval_query": "Irvine California building code amendments",
+    "similarity": 0.745432957734643
+  },
+  {
+    "question": "What sections are marked with amendment markers in the provided text?",
+    "answer": "The sections marked with amendment markers are Section 1705.23, Section 2111.14, and Section 402.6.",
+    "facts": [
+      "amendment markers",
+      "Section 1705.23",
+      "Section 2111.14"
+    ],
+    "citations": [
+      "Section 1705.23",
+      "Section 2111.14",
+      "Section 402.6"
+    ],
+    "source": "2024_BC.pdf",
+    "city": "Phoenix",
+    "retrieval_query": "local amendment exception international building code",
+    "similarity": 0.651898342597292
+  },
+  {
+    "question": "What code applies to the construction of swimming pools in Irvine?",
+    "answer": "The provisions of the International Swimming Pool and Spa Code, as amended, shall apply to the construction of public and private swimming pools and spas.",
+    "facts": [
+      "International Swimming Pool and Spa Code",
+      "construction",
+      "swimming pools"
+    ],
+    "citations": [
+      "Section 101.4.10"
+    ],
+    "source": "2013_Whole.pdf",
+    "city": "Irvine",
+    "retrieval_query": "amendment adopted ordinance building code",
+    "similarity": 0.650151988854887
+  },
+  {
+    "question": "Are electric vehicle charging stations required to be parking spaces according to the 2024 IBC amendment?",
+    "answer": "An electric vehicle charging station is not required to be a parking space.",
+    "facts": [
+      "electric vehicle charging stations",
+      "not required",
+      "parking space"
+    ],
+    "citations": [
+      "Section 1107.2"
+    ],
+    "source": "2024_BC.pdf",
+    "city": "Phoenix",
+    "retrieval_query": "Phoenix building code electric vehicle charging",
+    "similarity": 0.726741758196569
+  },
+  {
+    "question": "Are automatic sprinkler systems required for Group R occupancies in Phoenix according to the 2024 amendment?",
+    "answer": "Yes, Group R occupancies shall be equipped throughout with an automatic sprinkler system in accordance with Section 903.2.8.",
+    "facts": [
+      "automatic sprinkler system",
+      "Group R occupancies",
+      "Section 903.2.8"
+    ],
+    "citations": [
+      "Section 420.4"
+    ],
+    "source": "2024_BC.pdf",
+    "city": "Phoenix",
+    "retrieval_query": "Phoenix amendment fire sprinkler requirements",
+    "similarity": 0.68480319109026
+  },
+  {
+    "question": "Was the amendment approved in the previous 2015 Code Adoption process?",
+    "answer": "YES",
+    "facts": [
+      "amendment",
+      "2015 Code Adoption",
+      "approved"
+    ],
+    "citations": [
+      "2018_BC.pdf"
+    ],
+    "source": "2018_BC.pdf",
+    "city": "Phoenix",
+    "retrieval_query": "Phoenix 2024 building construction code change",
+    "similarity": 0.74943830815221
+  },
+  {
+    "question": "What is the publication date of the 2012 Northern Nevada Amendments?",
+    "answer": "February 4, 2013",
+    "facts": [
+      "2012 Northern Nevada Amendments",
+      "publication date",
+      "February 4, 2013"
+    ],
+    "citations": [
+      "2012 Northern Nevada Code Amendments Page 2"
+    ],
+    "source": "2012_Whole.pdf",
+    "city": "Reno",
+    "retrieval_query": "Reno Northern Nevada code amendments residential",
+    "similarity": 0.699890944384463
+  },
+  {
+    "question": "What is required for interior exit stairways serving floors more than 75 feet above the lowest level of fire department vehicle access?",
+    "answer": "Every required interior exit stairway serving floors more than 75 feet above the lowest level of fire department vehicle access shall be a smokeproof enclosure in accordance with Sections 909.20 and 1023.12.",
+    "facts": [
+      "interior exit stairway",
+      "more than 75 feet",
+      "smokeproof enclosure"
+    ],
+    "citations": [
+      "Section 403.5.4"
+    ],
+    "source": "2024_Whole.pdf",
+    "city": "Reno",
+    "retrieval_query": "Reno building code fire protection requirements",
+    "similarity": 0.599180824871645
+  },
+  {
+    "question": "What section addresses the construction demolition in the City of San Diego Amendments to the 2025 Code?",
+    "answer": "The construction demolition is addressed in CBC 2025 in effect Ch 14 Art 5 \u00a7145.3303.",
+    "facts": [
+      "construction demolition",
+      "CBC 2025",
+      "\u00a7145.3303"
+    ],
+    "citations": [
+      "Section 145.3303"
+    ],
+    "source": "2025_Whole.pdf",
+    "city": "Sandiego",
+    "retrieval_query": "San Diego building code local amendment findings",
+    "similarity": 0.706797985660617
+  },
+  {
+    "question": "What criteria are used to determine that a structure is dangerous according to the City of San Diego Amendments to the 2025 Code?",
+    "answer": "A structure is determined to be dangerous if there is a significant risk of collapse, detachment, or dislodgement of any portion, member, appurtenance, or ornamentation of the structure under permanent, routine, or frequent loads, under actual loads already in effect, or under wind, rain, flood, earthquake, or other environmental conditions.",
+    "facts": [
+      "dangerous",
+      "risk of collapse",
+      "structure"
+    ],
+    "citations": [
+      "\u00a7121.0403"
+    ],
+    "source": "2025_Whole.pdf",
+    "city": "Sandiego",
+    "retrieval_query": "San Diego unsafe dangerous buildings amendment",
+    "similarity": 0.627234421537256
+  },
+  {
+    "question": "Which section of the San Diego Municipal Code modifies Section R306.1 to reference City flood requirements?",
+    "answer": "Section R306.1 is modified to reference City flood requirements in SDMC Chapter 14 Article 9 \u00a7149.0306.",
+    "facts": [
+      "Section R306.1",
+      "City flood requirements",
+      "SDMC Chapter 14 Article 9 \u00a7149.0306"
+    ],
+    "citations": [
+      "Ch 14 Art 9 \u00a7149.0306"
+    ],
+    "source": "2025_Whole.pdf",
+    "city": "Sandiego",
+    "retrieval_query": "San Diego 2025 code amendment requirements",
+    "similarity": 0.765330419858124
+  },
+  {
+    "question": "What is the effective date of the City of Santa Clarita Fire Code?",
+    "answer": "January 1, 2014",
+    "facts": [
+      "Santa Clarita",
+      "Fire Code",
+      "effective date"
+    ],
+    "citations": [
+      "Title 22"
+    ],
+    "source": "2013_Whole.pdf",
+    "city": "SantaClarita",
+    "retrieval_query": "Santa Clarita building code amendment fire",
+    "similarity": 0.72478730087583
+  },
+  {
+    "question": "What are the requirements for buildings in Seismic Design Categories C, D, and E in Santa Clarita?",
+    "answer": "Buildings in Seismic Design Categories C, D, and E shall be designed to resist seismic loads in accordance with the California Building Code as amended by the City of Santa Clarita. Elements of the lateral force resisting system which are designed to resist seismic loads shall comply with the provisions of the California Building Code as amended by the City of Santa Clarita.",
+    "facts": [
+      "Seismic Design Categories",
+      "resist seismic loads",
+      "California Building Code"
+    ],
+    "citations": [
+      "Section R301.2.2"
+    ],
+    "source": "2025_Whole.pdf",
+    "city": "SantaClarita",
+    "retrieval_query": "Santa Clarita seismic design requirements amendment",
+    "similarity": 0.750504911066284
+  },
+  {
+    "question": "What is the amendment to IBC SECTION 102 in the Scottsdale Revised Code?",
+    "answer": "The only amendment to SECTION 102, APPLICABILITY, is the addition of Section 102.6.3.",
+    "facts": [
+      "amendment",
+      "SECTION 102",
+      "Section 102.6.3"
+    ],
+    "citations": [
+      "Sec. 31-3"
+    ],
+    "source": "2021_BC.pdf",
+    "city": "Scottsdale",
+    "retrieval_query": "Scottsdale building code amendment requirements",
+    "similarity": 0.696752657421829
+  },
+  {
+    "question": "Which cities are in our building code dataset, what states are they in, and what are their primary hazard types?",
+    "category": "cross_jurisdiction",
+    "answer": "Los Angeles (CA, pop 3,857,897, hazard: wildfire); San Diego (CA, pop 1,385,061, hazard: wildfire)",
+    "facts": [
+      "Los Angeles",
+      "San Diego",
+      "wildfire",
+      "wildfire"
+    ],
+    "citations": []
+  },
+  {
+    "question": "Compare the amendment activity across cities. Which city has adopted or amended its building code most frequently?",
+    "category": "cross_jurisdiction",
+    "answer": "Los Angeles: 68 events (2010-2026), 12 with local amendments; San Diego: 68 events (2010-2026), 8 with local amendments",
+    "facts": [
+      "Los Angeles",
+      "68",
+      "Los Angeles",
+      "San Diego"
+    ],
+    "citations": []
+  },
+  {
+    "question": "What building code editions have been adopted by Los Angeles and San Diego? List them with years.",
+    "category": "cross_jurisdiction",
+    "answer": "los-angeles: 2015 CBC (LA Amendments) (2015); los-angeles: 2019 CBC (LA Amendments) (2019); losangeles: 2015 CBC (LA Amendments) (2015); losangeles: 2019 CBC (LA Amendments) (2019); san-diego: 2015 CBC (SD Amendments) (2015); san-diego: 2019 CBC (SD Amendments) (2019); sandiego: 2015 CBC (SD Amendments) (2015); sandiego: 2019 CBC (SD Amendments) (2019)",
+    "facts": [
+      "2015 CBC (LA Amendments)",
+      "2019 CBC (LA Amendments)",
+      "2015 CBC (LA Amendments)",
+      "2019 CBC (LA Amendments)",
+      "2015 CBC (SD Amendments)",
+      "2019 CBC (SD Amendments)",
+      "2015 CBC (SD Amendments)",
+      "2019 CBC (SD Amendments)",
+      "2015",
+      "2019",
+      "2015",
+      "2019",
+      "2015",
+      "2019",
+      "2015",
+      "2019"
+    ],
+    "citations": []
+  },
+  {
+    "question": "Which building code sections are addressed by multiple cities in our dataset? List the shared sections.",
+    "category": "cross_jurisdiction",
+    "answer": "Section 100 (Barr Harbor Drive, P.O. Box C700): Los Angeles, San Diego; Section 1001.1 (General): Los Angeles, San Diego; Section 1001.2 (Minimum Requirements): Los Angeles, San Diego; Section 1003.1 (Applicability): Los Angeles, San Diego; Section 1003.1.1 (Means of Egress for Hospitals): Los Angeles, San Diego; Section 1003.2 (Ceiling Height): Los Angeles, San Diego; Section 1003.3 (Protruding Objects): Los Angeles, San Diego; Section 1003.3.1 (Headroom): Los Angeles, San Diego; Section 1003.3.2 (Post-Mounted Objects): Los Angeles, San Diego; Section 1003.3.3 (Horizontal Projections): Los Angeles, San Diego",
+    "facts": [
+      "100",
+      "1001.1",
+      "1001.2",
+      "1003.1",
+      "1003.1.1",
+      "San Diego",
+      "Los Angeles"
+    ],
+    "citations": [
+      "Section 100",
+      "Section 1001.1",
+      "Section 1001.2",
+      "Section 1003.1",
+      "Section 1003.1.1"
+    ]
+  },
+  {
+    "question": "Which cities in our dataset are affected by which natural hazards according to the knowledge graph?",
+    "category": "climate_resilience",
+    "answer": "Los Angeles: Wildfire; San Diego: Wildfire",
+    "facts": [
+      "Los Angeles",
+      "San Diego",
+      "Wildfire",
+      "Wildfire"
+    ],
+    "citations": []
+  },
+  {
+    "question": "How do Los Angeles and Phoenix differ in their building code amendments regarding fire protection sprinkler requirements?",
+    "answer": "Los Angeles requires automatic residential fire sprinkler systems to be installed in the entire townhouse. Phoenix requires automatic sprinkler systems in one- and two-family dwellings and townhouses, except for additions or alterations to existing buildings that are not already provided with a sprinkler system, unless required by the Phoenix Fire Code.",
+    "facts": [
+      "Los Angeles mandates automatic residential fire sprinkler systems in the entire townhouse.",
+      "Phoenix mandates automatic sprinkler systems in one- and two-family dwellings and townhouses, with exceptions for certain additions or alterations."
+    ],
+    "citations": [
+      "[LosAngeles] automatic residential fire sprinkler system must be installed in the entire townhouse.",
+      "[Phoenix] Other than where preempted by Arizona State Law, an automatic sprinkler system shall be installed in one- and two-family dwellings.",
+      "[Phoenix] R309.1 Townhouse automatic sprinkler systems."
+    ],
+    "category": "cross_jurisdiction"
+  },
+  {
+    "question": "How do Los Angeles and San Diego building code amendments differ in terms of seismic earthquake design requirements?",
+    "answer": "Los Angeles requires the design base shear to be not less than 75 percent of the currently required by Section 12.8.1 of ASCE 7, or not less than V= 0.133 W, where V is the total design lateral force. Specific details for San Diego's amendments are not provided in the text.",
+    "facts": [
+      "Los Angeles requires the design base shear to be not less than 75 percent of the currently required by Section 12.8.1 of ASCE 7.",
+      "Los Angeles specifies that the design base shear should not be less than V= 0.133 W."
+    ],
+    "citations": [
+      "[LosAngeles] Sec. 164. Subsection 91.9406.1.2 of the Los Angeles Municipal Code"
+    ],
+    "category": "cross_jurisdiction"
+  },
+  {
+    "question": "How do Los Angeles and Henderson differ in their building code adoption approach regarding the IBC and CBC?",
+    "answer": "Los Angeles adopts sections of the California Building Code (CBC) by reference but makes specific amendments by not adopting certain sections and adding its own subsections. In contrast, there is no specific information provided about Henderson's approach to adopting the IBC or CBC in the given text.",
+    "facts": [
+      "Los Angeles adopts sections of the CBC by reference but excludes certain sections and adds its own subsections.",
+      "Specific sections of the CBC, such as 703.2.3 and 1207.1, are not adopted by Los Angeles, and instead, local amendments are made."
+    ],
+    "citations": [
+      "[LosAngeles] Municipal Code",
+      "[LosAngeles] Existing Building Code"
+    ],
+    "category": "cross_jurisdiction"
+  },
+  {
+    "question": "How do Irvine and Santa Clarita differ in their building code amendments regarding energy conservation code requirements?",
+    "answer": "The text only provides information about Santa Clarita's energy conservation code requirements. It states that Santa Clarita has adopted the California Code of Regulations, Title 24, Part 6, and that their Energy Conservation Code became effective for new building permit applications received on or after January 1, 2020. There is no information provided about Irvine's energy conservation code requirements.",
+    "facts": [
+      "Santa Clarita has adopted the California Code of Regulations, Title 24, Part 6.",
+      "Santa Clarita's Energy Conservation Code became effective for new building permit applications on or after January 1, 2020."
+    ],
+    "citations": [
+      "[SantaClarita] The City of Santa Clarita Energy Conservation Code shall become effective for new building permit applications received by the City on or after January 1, 2020.",
+      "[SantaClarita] Adoption of the City of Santa Clarita Energy Conservation Code Effective date: January 1, 2014"
+    ],
+    "category": "cross_jurisdiction"
+  },
+  {
+    "question": "How do Reno and Henderson differ in their residential code sprinkler amendments?",
+    "answer": "Reno requires automatic sprinkler systems in townhouses and one- and two-family dwellings, with exceptions for existing buildings without systems and smaller dwellings. Henderson's amendment focuses on the requirement for a secondary water supply for sprinkler systems.",
+    "facts": [
+      "Reno mandates automatic sprinkler systems in townhouses and one- and two-family dwellings.",
+      "Reno provides exceptions for existing buildings without sprinkler systems and for one- and two-family dwellings under 5,000 sq. ft.",
+      "Henderson requires a dedicated secondary on-site water supply for sprinkler systems."
+    ],
+    "citations": [
+      "Reno Section R309.1",
+      "Reno R313.1",
+      "Henderson Ordinance No. 3040 Page 9"
+    ],
+    "category": "cross_jurisdiction"
+  },
+  {
+    "question": "What are the differences in building code amendments between Phoenix and Scottsdale?",
+    "answer": "Phoenix and Scottsdale have different approaches to building code amendments. Phoenix has carried forward amendments from previous code adoptions, specifically evaluated for applicability to the 2018 International Building Code (IBC). Scottsdale, on the other hand, has adopted the 2021 Edition of the International Building Code with specific amendments, such as the addition of Section 102.6.3 for retroactive upgrades.",
+    "facts": [
+      "Phoenix has amendments evaluated for the 2018 IBC.",
+      "Scottsdale has adopted the 2021 IBC with specific amendments.",
+      "Scottsdale added Section 102.6.3 for retroactive upgrades."
+    ],
+    "citations": [
+      "[Phoenix] Phoenix Building Construction Code for many years.",
+      "[Scottsdale] 2022 City of Scottsdale Amendments to the International Building Code, 2021 Edition"
+    ],
+    "category": "cross_jurisdiction"
+  },
+  {
+    "question": "What is the complete timeline of building code amendments adopted by Los Angeles?",
+    "category": "temporal",
+    "answer": "Los Angeles amendments: 2011: Y (BC); 2011: Y (RC); 2014: Y (BC); 2014: Y (RC); 2017: Y (BC); 2017: Y (RC); 2020: Y (BC); 2020: Y (RC); 2023: Y (BC); 2023: Y (RC); 2026: Y (BC); 2026: Y (RC)",
+    "facts": [
+      "Los Angeles",
+      "2011",
+      "2011",
+      "2014",
+      "2014",
+      "2017",
+      "2017",
+      "2020",
+      "2020",
+      "2023",
+      "2023",
+      "2026",
+      "2026"
+    ],
+    "citations": []
+  },
+  {
+    "question": "What is the complete timeline of building code amendments adopted by San Diego?",
+    "category": "temporal",
+    "answer": "San Diego amendments: 2017: Y (BC); 2017: Y (RC); 2020: Y (BC); 2020: Y (RC); 2023: Y (BC); 2023: Y (RC); 2026: Y (BC); 2026: Y (RC)",
+    "facts": [
+      "San Diego",
+      "2017",
+      "2017",
+      "2020",
+      "2020",
+      "2023",
+      "2023",
+      "2026",
+      "2026"
+    ],
+    "citations": []
+  },
+  {
+    "question": "In which city does the building code require surgical cystoscopic and other endourologic procedure rooms to have a minimum clear floor area of 250 square feet with specific dimensions between fixed cabinets and built-in shelves?",
+    "answer": "San Diego",
+    "facts": [
+      "The building code section 1224.15.2.2.1 specifies requirements for surgical cystoscopic and other endourologic procedure rooms.",
+      "The code requires each room to have a minimum clear floor area of 250 square feet with a minimum of 15 feet clear dimension between fixed cabinets and built-in shelves.",
+      "This specific code section applies to the city of San Diego."
+    ],
+    "citations": [
+      "Section 1224.15.2.2.1 of the building code",
+      "City: San Diego"
+    ],
+    "category": "multi_hop"
+  },
+  {
+    "question": "In which city does the building code require the storage and use of unstable (reactive) materials to comply with Section 6601.1, and what are the exceptions to this requirement?",
+    "answer": "The city is San Diego, and the exceptions to the requirement are: 1. Display and storage in Group M and storage in Group S occupancies complying with Section 5003.11. 2. Detonable unstable (reactive) materials.",
+    "facts": [
+      "The building code applies to the city of San Diego.",
+      "Section 6601.1 specifies the scope for the storage and use of unstable (reactive) materials.",
+      "Exceptions to this requirement include display and storage in Group M and storage in Group S occupancies complying with Section 5003.11, and detonable unstable (reactive) materials."
+    ],
+    "citations": [
+      "San Diego Building Code, Section 6601.1"
+    ],
+    "category": "multi_hop"
+  },
+  {
+    "question": "In which city does the building code section 1224.29 apply to intensive care units, and what are the general requirements for these units?",
+    "answer": "The building code section 1224.29 applies to intensive care units in Los Angeles, and the general requirements state that the section applies to all types of intensive care service spaces, including acute respiratory-care service spaces, burn center spaces, critical-care units, coronary-care service spaces, and pediatric intensive-care service spaces unless otherwise noted.",
+    "facts": [
+      "The city is Los Angeles.",
+      "The section is 1224.29, which pertains to intensive care units.",
+      "The general requirements apply to various types of intensive care service spaces."
+    ],
+    "citations": [
+      "Section 1224.29.1 General"
+    ],
+    "category": "multi_hop"
+  },
+  {
+    "question": "In which city does the building code require every toilet to be of the water-flush type and connected to a public sewer or private sewage disposal system, as specified in Section 3305.2?",
+    "answer": "Los Angeles",
+    "facts": [
+      "The building code specifies that every toilet shall be of the water-flush type and connected to a public sewer or a private sewage disposal system.",
+      "This requirement is detailed in Section 3305.2 (Toilet Standards).",
+      "The city to which this building code applies is Los Angeles."
+    ],
+    "citations": [
+      "Section 3305.2 (Toilet Standards)"
+    ],
+    "category": "multi_hop"
+  },
+  {
+    "question": "In which city does the building code require that the details of design, workmanship, and technique for welding conform to the requirements listed in CBC Sections 2205 to 2211, and where special inspection of welding is mandated by CBC Section 2204.1?",
+    "answer": "Los Angeles",
+    "facts": [
+      "The building code section 2204.1 specifies requirements for welding, including design, workmanship, and inspection.",
+      "The city mentioned in the building code data is Los Angeles."
+    ],
+    "citations": [
+      "Section 2204.1 of the building code",
+      "City: Los Angeles"
+    ],
+    "category": "multi_hop"
+  },
+  {
+    "question": "In which city does the building code specify that the walkline across winder treads must be concentric to the direction of travel and located 12 inches from the narrower side?",
+    "answer": "Los Angeles",
+    "facts": [
+      "The building code section 1011.4 specifies requirements for walklines across winder treads.",
+      "The walkline must be concentric to the direction of travel and located 12 inches from the side where the winders are narrower.",
+      "This specific code requirement applies to the city of Los Angeles."
+    ],
+    "citations": [
+      "Section 1011.4 (Walkline) of the Los Angeles building code"
+    ],
+    "category": "multi_hop"
+  },
+  {
+    "answer": "The city of [Irvine] has adopted amendments addressing wildfire or fire hazard protection.",
+    "facts": [
+      "Irvine has revised Section 304.1.2 Vegetation to address vegetation clearance to prevent fire hazards.",
+      "Irvine has made amendments to Chapter 7A of the California Building Code concerning materials and construction methods for exterior wildfire exposure."
+    ],
+    "citations": [
+      "Irvine: Section 304.1.2 Vegetation",
+      "Irvine: CHAPTER 4. AMENDMENTS TO BUILDING AND FIRE CODE TECHNICAL REGULATIONS"
+    ],
+    "question": "Which cities have adopted amendments addressing wildfire or fire hazard protection?",
+    "category": "climate_resilience"
+  },
+  {
+    "answer": "Seismic design requirements in California, specifically in cities like Los Angeles and Santa Clarita, include modifications to standard equations and specific parameters such as seismic response coefficients and design base shear. These requirements are detailed in local building codes and standards like SEAOC PV1-2012 & PV2-2012, and ASCE 7 modifications. Other states in the dataset are not mentioned, so a direct comparison cannot be made.",
+    "facts": [
+      "Los Angeles City Building Code 2019 includes specific seismic design parameters such as basic seismic force-resisting systems, design base shear, and seismic response coefficients.",
+      "Santa Clarita has added sections to modify ASCE 7 equations for seismic design."
+    ],
+    "citations": [
+      "Los Angeles City Building Code 2019",
+      "Santa Clarita SEAOC PV1-2012 & PV2-2012"
+    ],
+    "question": "How do seismic design requirements differ between California and other states in our dataset?",
+    "category": "climate_resilience"
+  },
+  {
+    "answer": "San Diego has the most recent building code adoptions with the 2025 code edition in effect.",
+    "facts": [
+      "San Diego has adopted the 2025 code edition for CRC and CEBC, which are currently in effect."
+    ],
+    "citations": [
+      "Sandiego [TABLE] Code Name | Code Edition | 2025 Code Status | SDMC Chapter/ Article | SDMC Section"
+    ],
+    "question": "Which cities have the most recent building code adoptions, and does code recency correlate with hazard exposure?",
+    "category": "climate_resilience"
+  }
+]

@@ -1,0 +1,393 @@
+{
+  "metadata": {
+    "source": "Fulton County Sales Records (HUP Lab)",
+    "total_records": 35290,
+    "time_span": "2011-2022",
+    "neighborhoods": [
+      "Midtown",
+      "Downtown",
+      "Old Fourth Ward",
+      "West End / Vine City"
+    ],
+    "generated": "2026-03-31"
+  },
+  "neighborhoods": {
+    "Midtown": {
+      "total_sales": 25757,
+      "valid_sales": 19688,
+      "median_price": 186000,
+      "median_fmv": 171000,
+      "median_ratio": 1.02,
+      "tiers": {
+        "distressed": 2683,
+        "below_market": 968,
+        "fair_value": 9096,
+        "moderate_opportunity": 3114,
+        "high_opportunity": 3827
+      },
+      "top_land_uses": [
+        {
+          "code": "106",
+          "label": "Condo",
+          "count": 9405
+        },
+        {
+          "code": "101",
+          "label": "Single Family",
+          "count": 6966
+        },
+        {
+          "code": "110",
+          "label": "Apartment",
+          "count": 2781
+        },
+        {
+          "code": "100",
+          "label": "Vacant Land",
+          "count": 1777
+        },
+        {
+          "code": "102",
+          "label": "Duplex",
+          "count": 965
+        }
+      ],
+      "vacant_parcels": 1777,
+      "year_trends": {
+        "2011": {
+          "median_ratio": 1.0,
+          "count": 1606
+        },
+        "2012": {
+          "median_ratio": 0.79,
+          "count": 1365
+        },
+        "2013": {
+          "median_ratio": 1.0,
+          "count": 1415
+        },
+        "2014": {
+          "median_ratio": 1.1,
+          "count": 1009
+        },
+        "2015": {
+          "median_ratio": 1.07,
+          "count": 1123
+        },
+        "2016": {
+          "median_ratio": 1.0,
+          "count": 1425
+        },
+        "2017": {
+          "median_ratio": 1.35,
+          "count": 1405
+        },
+        "2018": {
+          "median_ratio": 1.07,
+          "count": 2104
+        },
+        "2019": {
+          "median_ratio": 1.02,
+          "count": 2059
+        },
+        "2020": {
+          "median_ratio": 1.03,
+          "count": 1721
+        },
+        "2021": {
+          "median_ratio": 1.02,
+          "count": 1706
+        },
+        "2022": {
+          "median_ratio": 1.03,
+          "count": 2310
+        }
+      }
+    },
+    "Downtown": {
+      "total_sales": 6320,
+      "valid_sales": 5126,
+      "median_price": 350000,
+      "median_fmv": 309400,
+      "median_ratio": 1.04,
+      "tiers": {
+        "distressed": 258,
+        "below_market": 162,
+        "fair_value": 2901,
+        "moderate_opportunity": 988,
+        "high_opportunity": 817
+      },
+      "top_land_uses": [
+        {
+          "code": "101",
+          "label": "Single Family",
+          "count": 1914
+        },
+        {
+          "code": "106",
+          "label": "Condo",
+          "count": 1701
+        },
+        {
+          "code": "110",
+          "label": "Apartment",
+          "count": 920
+        },
+        {
+          "code": "107",
+          "label": "Townhouse",
+          "count": 786
+        },
+        {
+          "code": "102",
+          "label": "Duplex",
+          "count": 216
+        }
+      ],
+      "vacant_parcels": 161,
+      "year_trends": {
+        "2011": {
+          "median_ratio": 1.03,
+          "count": 282
+        },
+        "2012": {
+          "median_ratio": 0.94,
+          "count": 269
+        },
+        "2013": {
+          "median_ratio": 1.0,
+          "count": 374
+        },
+        "2014": {
+          "median_ratio": 1.1,
+          "count": 389
+        },
+        "2015": {
+          "median_ratio": 1.05,
+          "count": 448
+        },
+        "2016": {
+          "median_ratio": 1.0,
+          "count": 470
+        },
+        "2017": {
+          "median_ratio": 1.33,
+          "count": 480
+        },
+        "2018": {
+          "median_ratio": 1.06,
+          "count": 435
+        },
+        "2019": {
+          "median_ratio": 1.05,
+          "count": 438
+        },
+        "2020": {
+          "median_ratio": 1.03,
+          "count": 418
+        },
+        "2021": {
+          "median_ratio": 1.03,
+          "count": 469
+        },
+        "2022": {
+          "median_ratio": 1.04,
+          "count": 591
+        }
+      }
+    },
+    "Old Fourth Ward": {
+      "total_sales": 2301,
+      "valid_sales": 1819,
+      "median_price": 223000,
+      "median_fmv": 207300,
+      "median_ratio": 1.03,
+      "tiers": {
+        "distressed": 235,
+        "below_market": 87,
+        "fair_value": 854,
+        "moderate_opportunity": 318,
+        "high_opportunity": 325
+      },
+      "top_land_uses": [
+        {
+          "code": "101",
+          "label": "Single Family",
+          "count": 1379
+        },
+        {
+          "code": "107",
+          "label": "Townhouse",
+          "count": 593
+        },
+        {
+          "code": "106",
+          "label": "Condo",
+          "count": 124
+        },
+        {
+          "code": "100",
+          "label": "Vacant Land",
+          "count": 80
+        },
+        {
+          "code": "102",
+          "label": "Duplex",
+          "count": 34
+        }
+      ],
+      "vacant_parcels": 80,
+      "year_trends": {
+        "2011": {
+          "median_ratio": 1.02,
+          "count": 103
+        },
+        "2012": {
+          "median_ratio": 0.65,
+          "count": 99
+        },
+        "2013": {
+          "median_ratio": 1.01,
+          "count": 124
+        },
+        "2014": {
+          "median_ratio": 1.13,
+          "count": 102
+        },
+        "2015": {
+          "median_ratio": 1.17,
+          "count": 96
+        },
+        "2016": {
+          "median_ratio": 1.0,
+          "count": 107
+        },
+        "2017": {
+          "median_ratio": 1.51,
+          "count": 129
+        },
+        "2018": {
+          "median_ratio": 1.08,
+          "count": 194
+        },
+        "2019": {
+          "median_ratio": 1.03,
+          "count": 275
+        },
+        "2020": {
+          "median_ratio": 1.01,
+          "count": 169
+        },
+        "2021": {
+          "median_ratio": 1.02,
+          "count": 163
+        },
+        "2022": {
+          "median_ratio": 1.03,
+          "count": 213
+        }
+      }
+    },
+    "West End / Vine City": {
+      "total_sales": 912,
+      "valid_sales": 651,
+      "median_price": 58601,
+      "median_fmv": 50000,
+      "median_ratio": 1.0,
+      "tiers": {
+        "distressed": 167,
+        "below_market": 50,
+        "fair_value": 204,
+        "moderate_opportunity": 67,
+        "high_opportunity": 163
+      },
+      "top_land_uses": [
+        {
+          "code": "101",
+          "label": "Single Family",
+          "count": 762
+        },
+        {
+          "code": "100",
+          "label": "Vacant Land",
+          "count": 40
+        },
+        {
+          "code": "373",
+          "label": "Other",
+          "count": 23
+        },
+        {
+          "code": "300",
+          "label": "Commercial",
+          "count": 16
+        },
+        {
+          "code": "107",
+          "label": "Townhouse",
+          "count": 11
+        }
+      ],
+      "vacant_parcels": 40,
+      "year_trends": {
+        "2011": {
+          "median_ratio": 1.0,
+          "count": 58
+        },
+        "2012": {
+          "median_ratio": 0.46,
+          "count": 51
+        },
+        "2013": {
+          "median_ratio": 1.0,
+          "count": 59
+        },
+        "2014": {
+          "median_ratio": 1.0,
+          "count": 40
+        },
+        "2015": {
+          "median_ratio": 1.01,
+          "count": 31
+        },
+        "2016": {
+          "median_ratio": 1.0,
+          "count": 33
+        },
+        "2017": {
+          "median_ratio": 1.16,
+          "count": 20
+        },
+        "2018": {
+          "median_ratio": 1.1,
+          "count": 72
+        },
+        "2019": {
+          "median_ratio": 1.16,
+          "count": 67
+        },
+        "2020": {
+          "median_ratio": 1.12,
+          "count": 78
+        },
+        "2021": {
+          "median_ratio": 1.0,
+          "count": 54
+        },
+        "2022": {
+          "median_ratio": 1.0,
+          "count": 67
+        }
+      }
+    }
+  },
+  "demo_highlights": {
+    "total_atlanta_core_sales": 35290,
+    "high_opportunity_parcels": 5132,
+    "distressed_parcels": 3343,
+    "vacant_land_parcels": 2058,
+    "ofw_2017_surge": "Old Fourth Ward hit 1.51 Sale/FMV ratio in 2017 \u2014 BeltLine effect",
+    "west_end_distress_2012": "West End ratio dropped to 0.46 in 2012 \u2014 post-recession distress",
+    "midtown_recovery": "Midtown ratio recovered from 0.79 (2012) to 1.35 (2017) \u2014 71% swing"
+  }
+}
