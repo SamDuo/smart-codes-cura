@@ -3,21 +3,25 @@ Phase 3: Multi-Agent RAG Pipeline for Building Code Amendments
 ================================================================
 
 Architecture:
-  User Query → Classifier Agent → Route to specialist:
-    ├── Factual Agent (single-city, single-section lookup)
-    ├── Cross-Jurisdiction Agent (compare 2+ cities)
-    ├── Temporal Agent (track changes over time)
-    └── Compliance Agent (multi-condition reasoning)
-  → Citation Validator → Final Answer
+  User Query â†’ Classifier Agent â†’ Route to specialist:
+    â”œâ”€â”€ Factual Agent (single-city, single-section lookup)
+    â”œâ”€â”€ Cross-Jurisdiction Agent (compare 2+ cities)
+    â”œâ”€â”€ Temporal Agent (track changes over time)
+    â””â”€â”€ Compliance Agent (multi-condition reasoning)
+  â†’ Citation Validator â†’ Final Answer
 
 Each agent uses targeted retrieval instead of dumping everything into one prompt.
 """
 
+import os
 import re
+from concurrent.futures import ThreadPoolExecutor
 import httpx
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 
-# ─── Config (from environment / Streamlit secrets) ──────────────────────────
+from query_cache import SemanticCache
+
+# â”€â”€â”€ Config (from environment / Streamlit secrets) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 from config import SUPABASE_URL, SUPABASE_SERVICE_KEY, OPENAI_API_KEY, NEO4J_URI, NEO4J_USER, NEO4J_PASSWORD
 
@@ -51,8 +55,19 @@ classifier_llm = ChatOpenAI(model="gpt-4o-mini", temperature=0, api_key=OPENAI_K
 answer_llm = ChatOpenAI(model="gpt-4o-mini", temperature=0, api_key=OPENAI_KEY)
 answer_llm_streaming = ChatOpenAI(model="gpt-4o-mini", temperature=0, api_key=OPENAI_KEY, streaming=True)
 
+# Semantic Cache
+_cache = SemanticCache(embed_fn=embeddings.embed_query)
+_seed_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "demo_cache.json")
+_seed_count = _cache.load_seed(_seed_path)
+if _seed_count:
+    print(f"[Cache] Loaded {_seed_count} pre-computed answers")
 
-# ─── Retrieval Helpers ────────────────────────────────────────────────────────
+# Parallel Retrieval
+_pool = ThreadPoolExecutor(max_workers=4)
+
+
+
+# â”€â”€â”€ Retrieval Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 def _dedupe_by_source(chunks: list, top_k: int, max_per_source: int = 2) -> list:
@@ -123,7 +138,7 @@ def chunks_to_context(chunks: list, label: str = "") -> str:
     return prefix + "\n---\n".join(parts)
 
 
-# ─── Graph Retrieval ─────────────────────────────────────────────────────────
+# â”€â”€â”€ Graph Retrieval â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 def graph_retrieve(query: str, cities: list = None) -> str:
@@ -248,7 +263,7 @@ def detect_cities(text: str) -> list:
     return found
 
 
-# ─── Agent 1: Query Classifier ───────────────────────────────────────────────
+# â”€â”€â”€ Agent 1: Query Classifier â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 def classify_query(question: str) -> dict:
@@ -280,7 +295,7 @@ def classify_query(question: str) -> dict:
     return {"category": category, "cities": cities}
 
 
-# ─── Agent 2: Factual Agent ──────────────────────────────────────────────────
+# â”€â”€â”€ Agent 2: Factual Agent â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 def factual_agent(question: str, cities: list) -> str:
@@ -303,7 +318,7 @@ def factual_agent(question: str, cities: list) -> str:
     return response.content
 
 
-# ─── Agent 3: Cross-Jurisdiction Agent ────────────────────────────────────────
+# â”€â”€â”€ Agent 3: Cross-Jurisdiction Agent â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 def cross_jurisdiction_agent(question: str, cities: list) -> str:
@@ -322,17 +337,18 @@ def cross_jurisdiction_agent(question: str, cities: list) -> str:
             cities.extend(detected)
 
     # Get structured graph context (city profiles, timelines, shared sections)
-    graph_text = graph_retrieve(question, cities=cities)
+    # Parallel: graph + all city vector searches at once
+    graph_fut = _pool.submit(graph_retrieve, question, cities)
+    city_futs = {c: _pool.submit(vector_search, question, 4, c) for c in cities[:3]}
+    gen_fut = _pool.submit(vector_search, question, 6) if len(cities) < 2 else None
 
-    # Retrieve from EACH city separately
+    graph_text = graph_fut.result()
     city_contexts = []
-    for city in cities[:3]:  # Max 3 cities
-        chunks = vector_search(question, top_k=4, city_filter=city)
+    for city in cities[:3]:
+        chunks = city_futs[city].result()
         city_contexts.append(chunks_to_context(chunks, label=city))
-
-    # Also get general results if fewer than 2 cities
-    if len(cities) < 2:
-        general_chunks = vector_search(question, top_k=6)
+    if gen_fut:
+        general_chunks = gen_fut.result()
         city_contexts.append(chunks_to_context(general_chunks, label="All Cities"))
 
     combined_context = "\n\n".join(city_contexts)
@@ -358,7 +374,7 @@ def cross_jurisdiction_agent(question: str, cities: list) -> str:
     return response.content
 
 
-# ─── Agent 4: Temporal Agent ──────────────────────────────────────────────────
+# â”€â”€â”€ Agent 4: Temporal Agent â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 def temporal_agent(question: str, cities: list) -> str:
@@ -367,16 +383,19 @@ def temporal_agent(question: str, cities: list) -> str:
     years = re.findall(r"20[12]\d", question)
 
     # Get graph context (adoption timelines are critical for temporal questions)
-    graph_text = graph_retrieve(question, cities=cities)
-
-    # Search for each year period
+    # Parallel: graph + year vector searches
+    graph_fut = _pool.submit(graph_retrieve, question, cities)
     contexts = []
     if years:
+        year_futs = {y: _pool.submit(vector_search, f"{question} {y}", 4) for y in years[:3]}
+        graph_text = graph_fut.result()
         for year in years[:3]:
-            chunks = vector_search(f"{question} {year}", top_k=4)
+            chunks = year_futs[year].result()
             contexts.append(chunks_to_context(chunks, label=f"Year {year}"))
     else:
-        chunks = vector_search(question, top_k=8)
+        vec_fut = _pool.submit(vector_search, question, 8)
+        graph_text = graph_fut.result()
+        chunks = vec_fut.result()
         contexts.append(chunks_to_context(chunks, label="Timeline"))
 
     combined = "\n\n".join(contexts)
@@ -401,7 +420,7 @@ def temporal_agent(question: str, cities: list) -> str:
     return response.content
 
 
-# ─── Agent 5: Compliance Agent ────────────────────────────────────────────────
+# â”€â”€â”€ Agent 5: Compliance Agent â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 def compliance_agent(question: str, cities: list) -> str:
@@ -449,7 +468,7 @@ def compliance_agent(question: str, cities: list) -> str:
     return response.content
 
 
-# ─── Agent 6: Citation Validator ──────────────────────────────────────────────
+# â”€â”€â”€ Agent 6: Citation Validator â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 def validate_citations(answer: str, question: str) -> str:
@@ -471,7 +490,7 @@ def validate_citations(answer: str, question: str) -> str:
         return answer + f"\n\n_Note: {validation_text}_"
 
 
-# ─── Main Pipeline ────────────────────────────────────────────────────────────
+# â”€â”€â”€ Main Pipeline â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 def multi_agent_answer(question: str, return_chunks: bool = False):
@@ -516,7 +535,7 @@ def multi_agent_answer(question: str, return_chunks: bool = False):
     return answer
 
 
-# ─── CLI Test ─────────────────────────────────────────────────────────────────
+# â”€â”€â”€ CLI Test â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 if __name__ == "__main__":
     import sys
@@ -537,7 +556,7 @@ if __name__ == "__main__":
     print(answer)
 
 
-# ─── Streaming Pipeline ─────────────────────────────────────────────────────
+# â”€â”€â”€ Streaming Pipeline â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 def _build_prompt_for_agent(question: str, category: str, cities: list) -> tuple[str, list]:
@@ -555,15 +574,20 @@ def _build_prompt_for_agent(question: str, category: str, cities: list) -> tuple
                 detected = detect_cities(name.strip())
                 cities.extend(detected)
 
-        graph_text = graph_retrieve(question, cities=cities)
+        # Parallel: graph + all city vector searches at once
+        graph_fut = _pool.submit(graph_retrieve, question, cities)
+        city_futs = {c: _pool.submit(vector_search, question, 4, c) for c in cities[:3]}
+        gen_fut = _pool.submit(vector_search, question, 6) if len(cities) < 2 else None
+
+        graph_text = graph_fut.result()
         city_contexts = []
         all_chunks = []
         for city in cities[:3]:
-            chunks = vector_search(question, top_k=4, city_filter=city)
+            chunks = city_futs[city].result()
             all_chunks.extend(chunks)
             city_contexts.append(chunks_to_context(chunks, label=city))
-        if len(cities) < 2:
-            general = vector_search(question, top_k=6)
+        if gen_fut:
+            general = gen_fut.result()
             all_chunks.extend(general)
             city_contexts.append(chunks_to_context(general, label="All Cities"))
         combined = "\n\n".join(city_contexts)
@@ -669,19 +693,40 @@ def _build_prompt_for_agent(question: str, category: str, cities: list) -> tuple
 
 def stream_multi_agent_answer(question: str):
     """Streaming version: yields tokens as they generate.
+    Checks semantic cache first, falls back to LLM streaming.
 
     Usage in Streamlit:
         st.write_stream(stream_multi_agent_answer(question))
+
+    Yields:
+        str tokens, or full cached answer as single yield.
+        Final yield is a dict with metadata: {"_meta": {"cached": bool}}
     """
+    # Step 0: Check semantic cache
+    cached = _cache.lookup(question)
+    if cached:
+        yield cached
+        yield {"_meta": {"cached": True}}
+        return
+
     # Step 1: Classify (fast, non-streaming)
     classification = classify_query(question)
     category = classification["category"]
     cities = classification["cities"]
 
-    # Step 2: Build prompt with retrieval (non-streaming)
+    # Step 2: Build prompt with retrieval (non-streaming, uses parallel)
     prompt, _ = _build_prompt_for_agent(question, category, cities)
 
     # Step 3: Stream the answer
+    full_answer = []
     for chunk in answer_llm_streaming.stream(prompt):
         if chunk.content:
+            full_answer.append(chunk.content)
             yield chunk.content
+
+    # Step 4: Store in cache for future queries
+    answer_text = "".join(full_answer)
+    if answer_text:
+        _cache.store(question, answer_text)
+
+    yield {"_meta": {"cached": False}}

@@ -89,9 +89,14 @@ def baseline_answer(question: str) -> str:
 
 
 def stream_multi_agent(question: str):
-    """Streaming multi-agent pipeline -- yields tokens as they generate."""
+    """Streaming multi-agent pipeline -- yields tokens, captures metadata."""
     from multi_agent_rag import stream_multi_agent_answer
-    yield from stream_multi_agent_answer(question)
+    for chunk in stream_multi_agent_answer(question):
+        if isinstance(chunk, dict) and "_meta" in chunk:
+            # Store metadata in session state for display after streaming
+            st.session_state["_last_meta"] = chunk["_meta"]
+        else:
+            yield chunk
 
 
 ### SIDEBAR ###
@@ -166,16 +171,18 @@ if user_question:
 
     with st.chat_message("assistant"):
         t0 = time.time()
+        st.session_state["_last_meta"] = {}
         try:
             if mode == "Multi-Agent RAG":
-                # Streaming: tokens appear as they generate
                 answer = st.write_stream(stream_multi_agent(user_question))
             else:
                 with st.spinner("Searching knowledge base..."):
                     answer = baseline_answer(user_question)
                 st.markdown(answer)
             elapsed = time.time() - t0
-            meta = f"{mode_label} | {elapsed:.1f}s"
+            cached = st.session_state.get("_last_meta", {}).get("cached", False)
+            cache_tag = " | cached" if cached else ""
+            meta = f"{mode_label} | {elapsed:.1f}s{cache_tag}"
         except Exception as e:
             answer = f"Error: {e}"
             meta = f"{mode_label} | error"
