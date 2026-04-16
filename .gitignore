@@ -6,9 +6,13 @@ __pycache__/
 lightrag_index/
 *.csv
 pages/documents/*.pdf
-eval_reports/*.json
 support_files/
-eval_reports/charts/*.png
+
+# Evaluation outputs (generated, not tracked)
+eval_reports/
+evaluation/reports/*.json
+evaluation/charts/*.png
+evaluation/charts/*.md
 
 # Internal docs / prompts / presentations
 LOVABLE_PROMPTS.md
