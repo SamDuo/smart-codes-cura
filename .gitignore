@@ -9,4 +9,16 @@ pages/documents/*.pdf
 eval_reports/*.json
 support_files/
 eval_reports/charts/*.png
+
+# Internal docs / prompts / presentations
+LOVABLE_PROMPTS.md
+PRESENTATION_SLIDES.md
+PLAN.md
+DEMO_MIDTOWN_ATLANTA.md
+DEMO_QA_PERSONAS.json
+ATLANTA_CORE_SUMMARY.json
+slide_script.txt
+*.pptx
+create_*.py
 *.jpg
+presentation_updates.html
