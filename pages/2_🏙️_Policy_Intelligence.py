@@ -111,7 +111,7 @@ st.markdown("""
 # ─── Sidebar ──────────────────────────────────────────────────────────────────
 
 with st.sidebar:
-    st.markdown("### **POLYMETRON**")
+    st.markdown("### **GT CURA**")
     st.markdown("*Policy Intelligence Module*")
     st.divider()
 

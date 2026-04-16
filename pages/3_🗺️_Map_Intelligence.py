@@ -54,9 +54,6 @@ ZONES = [
         "name": "Downtown Los Angeles",
         "lat": 34.0407, "lon": -118.2468,
         "city": "Los Angeles",
-        "zoning": "C2 (Commercial Zone)",
-        "max_height": "No limit (with FAR bonus)",
-        "far": "6.0 - 13.0",
         "code_edition": "2019 CBC (LA Amendments)",
         "hazards": ["Seismic (Zone D)", "Wildfire (VHFHSZ nearby)"],
         "climate_provisions": "LA Green Building Code, Cool roof requirements, EV charging mandates",
@@ -67,9 +64,6 @@ ZONES = [
         "name": "Hollywood / Wilshire",
         "lat": 34.0928, "lon": -118.3287,
         "city": "Los Angeles",
-        "zoning": "C4 (Commercial Zone)",
-        "max_height": "Varies by specific plan",
-        "far": "3.0 - 6.0",
         "code_edition": "2019 CBC (LA Amendments)",
         "hazards": ["Seismic (Zone D)", "Wildfire (hillside areas)"],
         "climate_provisions": "Hillside ordinance, Seismic retrofit requirements for soft-story buildings",
@@ -80,9 +74,6 @@ ZONES = [
         "name": "Downtown San Diego",
         "lat": 32.7157, "lon": -117.1611,
         "city": "San Diego",
-        "zoning": "CCPD (Centre City Planned District)",
-        "max_height": "Up to 500 ft (varies by block)",
-        "far": "10.0 - 20.0",
         "code_edition": "2025 CBC (SD Amendments)",
         "hazards": ["Seismic", "Coastal Flood", "Wildfire (eastern interface)"],
         "climate_provisions": "Climate Action Plan, Zero-net-energy by 2030, EV-ready requirements",
@@ -93,9 +84,6 @@ ZONES = [
         "name": "La Jolla / UC San Diego",
         "lat": 32.8328, "lon": -117.2713,
         "city": "San Diego",
-        "zoning": "RS-1-7 / CN-1-2 (Residential / Commercial)",
-        "max_height": "30 ft (coastal overlay)",
-        "far": "0.60 - 1.50",
         "code_edition": "2025 CBC (SD Amendments)",
         "hazards": ["Coastal Erosion", "Seismic", "Wildfire (Torrey Pines)"],
         "climate_provisions": "Coastal overlay zone, Bluff setback requirements, Sea level rise adaptation",
@@ -106,9 +94,6 @@ ZONES = [
         "name": "Irvine Business Complex",
         "lat": 33.6846, "lon": -117.8265,
         "city": "Irvine",
-        "zoning": "Multi-Use (Irvine Business Complex)",
-        "max_height": "Up to 400 ft (with approval)",
-        "far": "Varies by master plan",
         "code_edition": "2025 CBC (Irvine Amendments)",
         "hazards": ["Seismic", "Wildfire (eastern foothills)"],
         "climate_provisions": "CalGreen Tier 1 mandatory, EV charging for new construction",
@@ -119,9 +104,6 @@ ZONES = [
         "name": "Santa Clarita / Valencia",
         "lat": 34.3917, "lon": -118.5426,
         "city": "Santa Clarita",
-        "zoning": "CC (Community Commercial)",
-        "max_height": "50 ft",
-        "far": "1.0 - 2.0",
         "code_edition": "2025 CBC (Santa Clarita Amendments)",
         "hazards": ["Wildfire (VHFHSZ)", "Seismic (San Andreas proximity)"],
         "climate_provisions": "Wildland-urban interface requirements, Defensible space mandates",
@@ -133,9 +115,6 @@ ZONES = [
         "name": "Downtown Phoenix",
         "lat": 33.4484, "lon": -112.0740,
         "city": "Phoenix",
-        "zoning": "Downtown Code (DTC)",
-        "max_height": "250 ft (with bonuses)",
-        "far": "Varies by district",
         "code_edition": "2024 IBC (Phoenix Amendments)",
         "hazards": ["Extreme Heat"],
         "climate_provisions": "Heat mitigation, Cool roof incentives, Shade requirements for parking",
@@ -146,9 +125,6 @@ ZONES = [
         "name": "Henderson Town Center",
         "lat": 36.0395, "lon": -114.9817,
         "city": "Henderson",
-        "zoning": "TC (Town Center Mixed Use)",
-        "max_height": "Varies by sub-area",
-        "far": "2.0 - 6.0",
         "code_edition": "2024 IBC (Henderson Amendments)",
         "hazards": ["Seismic"],
         "climate_provisions": "Energy efficiency requirements, Water conservation mandates",
@@ -159,9 +135,6 @@ ZONES = [
         "name": "Downtown Reno",
         "lat": 39.5296, "lon": -119.8138,
         "city": "Reno",
-        "zoning": "DC (Downtown Core)",
-        "max_height": "No limit in core",
-        "far": "Varies",
         "code_edition": "2024 IBC (Reno Amendments)",
         "hazards": ["Seismic", "Wildfire (WUI)"],
         "climate_provisions": "Wildland-urban interface code, Snow load requirements",
@@ -172,9 +145,6 @@ ZONES = [
         "name": "Old Scottsdale",
         "lat": 33.4942, "lon": -111.9261,
         "city": "Scottsdale",
-        "zoning": "Downtown (D/DMU-2)",
-        "max_height": "150 ft (with bonuses)",
-        "far": "Varies by sub-district",
         "code_edition": "2021 IBC (Scottsdale Amendments)",
         "hazards": ["Extreme Heat"],
         "climate_provisions": "Desert-adapted landscaping, Heat island mitigation",
@@ -185,9 +155,6 @@ ZONES = [
         "name": "Midtown Atlanta",
         "lat": 33.7866, "lon": -84.3830,
         "city": "Atlanta",
-        "zoning": "SPI-17 (Midtown Special Public Interest)",
-        "max_height": "No limit (varies by sub-area)",
-        "far": "Varies by sub-area",
         "code_edition": "2024 IBC (GA State Amendments)",
         "hazards": ["Heat", "Stormwater flooding"],
         "climate_provisions": "Cool Roof Ordinance 25-O-1310, Green building incentives, Stormwater management",
@@ -215,10 +182,9 @@ with col_map:
     for zone in ZONES:
         popup_html = f"""
         <b>{zone['name']}</b> ({zone['city']})<br>
-        Zoning: {zone['zoning']}<br>
-        Max Height: {zone['max_height']}<br>
-        FAR: {zone['far']}<br>
-        Hazards: {', '.join(zone['hazards'])}
+        Code: {zone['code_edition']}<br>
+        Hazards: {', '.join(zone['hazards'])}<br>
+        Amendments: {zone['key_amendments'][:80]}...
         """
         folium.CircleMarker(
             location=[zone["lat"], zone["lon"]],
@@ -252,12 +218,6 @@ with col_detail:
     if selected_zone:
         st.markdown(f'<p class="zone-header">{selected_zone["name"]}</p>', unsafe_allow_html=True)
         st.caption(selected_zone["city"])
-
-        st.markdown(f"**Zoning:** {selected_zone['zoning']}")
-        st.markdown(f"**Max Height:** {selected_zone['max_height']}")
-        st.markdown(f"**FAR:** {selected_zone['far']}")
-
-        st.divider()
 
         st.markdown("#### Building Code")
         st.markdown(f"**Base Code:** {selected_zone['code_edition']}")
@@ -299,7 +259,7 @@ with col_detail:
         if zone_query and OPENAI_KEY:
             with st.spinner("Analyzing..."):
                 embeddings_model = OpenAIEmbeddings(model="text-embedding-3-large", api_key=OPENAI_KEY)
-                full_query = f"{zone_query} (Context: {selected_zone['city']}, {selected_zone['zoning']})"
+                full_query = f"{zone_query} (Context: {selected_zone['city']}, {selected_zone['code_edition']})"
                 emb = embeddings_model.embed_query(full_query)
                 res = httpx.post(
                     f"{SUPABASE_URL}/rest/v1/rpc/match_documents",
@@ -325,9 +285,9 @@ with col_detail:
 
                 llm = ChatOpenAI(model="gpt-4o-mini", temperature=0, api_key=OPENAI_KEY)
                 response = llm.invoke(
-                    f"You are a building code expert for California cities.\n"
+                    f"You are a building code expert.\n"
                     f"City: {selected_zone['city']}\n"
-                    f"Zone: {selected_zone['name']} ({selected_zone['zoning']})\n"
+                    f"Area: {selected_zone['name']}\n"
                     f"Code: {selected_zone['code_edition']}\n"
                     f"Hazards: {', '.join(selected_zone['hazards'])}\n\n"
                     f"Retrieved code passages:\n{context}\n\n"
