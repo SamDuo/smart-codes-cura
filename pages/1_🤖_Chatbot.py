@@ -148,7 +148,7 @@ with col1:
 with col2:
     st.header("Building Code Chatbot")
     mode_label = "Multi-Agent RAG" if mode == "Multi-Agent RAG" else "Baseline"
-    st.caption(f"Mode: {mode_label} | 9 cities | 12,280 passages")
+    st.caption(f"Mode: {mode_label} | 10 cities | 12,280 passages")
 
 ### CHAT ###
 
@@ -180,9 +180,12 @@ if user_question:
                     answer = baseline_answer(user_question)
                 st.markdown(answer)
             elapsed = time.time() - t0
-            cached = st.session_state.get("_last_meta", {}).get("cached", False)
+            last_meta = st.session_state.get("_last_meta", {})
+            cached = last_meta.get("cached", False)
+            agent_type = last_meta.get("agent", "")
             cache_tag = " | cached" if cached else ""
-            meta = f"{mode_label} | {elapsed:.1f}s{cache_tag}"
+            agent_tag = f" | {agent_type}" if agent_type else ""
+            meta = f"{mode_label}{agent_tag} | {elapsed:.1f}s{cache_tag}"
         except Exception as e:
             answer = f"Error: {e}"
             meta = f"{mode_label} | error"

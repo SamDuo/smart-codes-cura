@@ -13,6 +13,9 @@ import time
 
 import streamlit as st
 import httpx
+import plotly.graph_objects as go
+import plotly.express as px
+import pandas as pd
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_core.messages import AIMessage, HumanMessage
 
@@ -141,43 +144,159 @@ with col_logo:
         st.image(logo_path, width=80)
 with col_title:
     st.markdown('<p class="main-header">Policy Intelligence</p>', unsafe_allow_html=True)
-    st.markdown('<p class="sub-header">Cross-jurisdiction building code amendment analysis for 8 US cities</p>', unsafe_allow_html=True)
+    st.markdown(f'<p class="sub-header">Cross-jurisdiction building code amendment analysis for {len(CITIES)} US cities</p>', unsafe_allow_html=True)
 
 # ─── Metrics Row ──────────────────────────────────────────────────────────────
 
+states = sorted(set(v["state"] for v in CITIES.values()))
 m1, m2, m3, m4 = st.columns(4)
 with m1:
-    st.metric("Cities", "8", help="Henderson, Irvine, LA, Phoenix, Reno, San Diego, Santa Clarita, Scottsdale")
+    st.metric("Cities", str(len(CITIES)))
 with m2:
-    st.metric("States", "CA, NV, AZ")
+    st.metric("States", ", ".join(states))
 with m3:
     st.metric("Time Span", "2010-2026")
 with m4:
-    st.metric("Hazard Types", "4", help="Wildfire, Seismic, Extreme Heat, Coastal Flood")
+    all_hazards = set()
+    for v in CITIES.values():
+        all_hazards.update(h.strip() for h in v["hazard"].split(","))
+    st.metric("Hazard Types", str(len(all_hazards)))
 
 st.divider()
 
-# ─── Preset Queries ───────────────────────────────────────────────────────────
+# ─── Visual Analytics ────────────────────────────────────────────────────────
 
-st.markdown("#### Try these queries")
-preset_cols = st.columns(3)
+tab_charts, tab_table, tab_chat = st.tabs(["Analytics", "City Comparison", "Ask Questions"])
 
-PRESETS = [
-    ("Compare fire codes", "How do Los Angeles and Phoenix approach fire protection amendments differently?"),
-    ("Seismic requirements", "What seismic design requirements apply in California cities vs Nevada cities?"),
-    ("Code recency", "Which cities have the most recent building code adoptions, and how current are they?"),
-    ("EV charging", "What do Phoenix's 2024 amendments say about electric vehicle charging stations?"),
-    ("Wildfire zones", "Which cities have adopted amendments specifically addressing wildfire hazard zones?"),
-    ("Amendment frequency", "Compare the amendment activity across all 8 cities. Who updates most frequently?"),
-]
+with tab_charts:
+    chart_col1, chart_col2 = st.columns(2)
 
-selected_preset = None
-for i, (label, query) in enumerate(PRESETS):
-    col = preset_cols[i % 3]
-    if col.button(f"  {label}  ", key=f"preset_{i}", use_container_width=True):
-        selected_preset = query
+    # --- Amendment Documents by City (bar chart) ---
+    with chart_col1:
+        df_docs = pd.DataFrame([
+            {"City": city, "Documents": info["docs"], "State": info["state"]}
+            for city, info in CITIES.items()
+        ]).sort_values("Documents", ascending=True)
 
-# ─── Retrieval Functions ──────────────────────────────────────────────────────
+        fig_docs = px.bar(
+            df_docs, x="Documents", y="City", orientation="h",
+            color="State",
+            color_discrete_map={"CA": "#667eea", "AZ": "#e74c3c", "NV": "#2ecc71", "GA": "#f39c12"},
+            title="Amendment Documents by City",
+        )
+        fig_docs.update_layout(
+            height=380, margin=dict(l=0, r=20, t=40, b=0),
+            plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
+            font=dict(size=12),
+        )
+        st.plotly_chart(fig_docs, use_container_width=True)
+
+    # --- Hazard Distribution (pie/sunburst) ---
+    with chart_col2:
+        hazard_counts = {}
+        for info in CITIES.values():
+            for h in info["hazard"].split(","):
+                h = h.strip()
+                hazard_counts[h] = hazard_counts.get(h, 0) + 1
+
+        fig_hazard = px.pie(
+            names=list(hazard_counts.keys()),
+            values=list(hazard_counts.values()),
+            title="Hazard Exposure Across Cities",
+            color=list(hazard_counts.keys()),
+            color_discrete_map={
+                "Wildfire": "#ff6f00", "Seismic": "#6a1b9a",
+                "Extreme Heat": "#e65100", "Coastal Flood": "#1565c0",
+                "Heat": "#e65100", "Stormwater": "#1565c0",
+            },
+        )
+        fig_hazard.update_layout(
+            height=380, margin=dict(l=0, r=0, t=40, b=0),
+            paper_bgcolor="rgba(0,0,0,0)",
+            font=dict(size=12),
+        )
+        st.plotly_chart(fig_hazard, use_container_width=True)
+
+    # --- Code Adoption Timeline (Gantt-style) ---
+    timeline_data = []
+    for city, info in CITIES.items():
+        years = info["years"].split("-")
+        start_year = int(years[0])
+        end_year = int(years[-1]) if len(years) > 1 else start_year
+        timeline_data.append({
+            "City": city,
+            "Start": f"{start_year}-01-01",
+            "End": f"{end_year}-12-31",
+            "Base Code": info["base"],
+            "State": info["state"],
+        })
+
+    df_timeline = pd.DataFrame(timeline_data)
+    df_timeline["Start"] = pd.to_datetime(df_timeline["Start"])
+    df_timeline["End"] = pd.to_datetime(df_timeline["End"])
+
+    fig_timeline = px.timeline(
+        df_timeline, x_start="Start", x_end="End", y="City",
+        color="Base Code",
+        color_discrete_map={"CBC": "#667eea", "IBC": "#2ecc71"},
+        title="Building Code Amendment Coverage Timeline",
+    )
+    fig_timeline.update_layout(
+        height=350, margin=dict(l=0, r=20, t=40, b=0),
+        plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
+        xaxis_title="", yaxis_title="",
+        font=dict(size=12),
+    )
+    st.plotly_chart(fig_timeline, use_container_width=True)
+
+# --- City Comparison Table ---
+with tab_table:
+    df_compare = pd.DataFrame([
+        {
+            "City": city,
+            "State": info["state"],
+            "Population": info["pop"],
+            "Base Code": info["base"],
+            "Hazards": info["hazard"],
+            "Documents": info["docs"],
+            "Year Range": info["years"],
+        }
+        for city, info in CITIES.items()
+    ])
+    st.dataframe(
+        df_compare,
+        use_container_width=True,
+        hide_index=True,
+        column_config={
+            "City": st.column_config.TextColumn("City", width="medium"),
+            "Documents": st.column_config.ProgressColumn("Documents", min_value=0, max_value=10, format="%d"),
+        },
+    )
+
+with tab_chat:
+
+    # ─── Preset Queries ──────────────────────────────────────────────────────
+
+    st.markdown("#### Try these queries")
+    preset_cols = st.columns(3)
+
+    PRESETS = [
+        ("Compare fire codes", "How do Los Angeles and Phoenix approach fire protection amendments differently?"),
+        ("Seismic requirements", "What seismic design requirements apply in California cities vs Nevada cities?"),
+        ("Code recency", "Which cities have the most recent building code adoptions, and how current are they?"),
+        ("EV charging", "What do Phoenix's 2024 amendments say about electric vehicle charging stations?"),
+        ("Wildfire zones", "Which cities have adopted amendments specifically addressing wildfire hazard zones?"),
+        ("Amendment frequency", f"Compare the amendment activity across all {len(CITIES)} cities. Who updates most frequently?"),
+    ]
+
+    selected_preset = None
+    for i, (label, query) in enumerate(PRESETS):
+        col = preset_cols[i % 3]
+        if col.button(f"  {label}  ", key=f"preset_{i}", use_container_width=True):
+            selected_preset = query
+
+
+# ─── Retrieval Functions ─────────────────────────────────────────────────────
 
 
 def vector_retrieve(query: str, top_k: int = 8) -> list:
@@ -203,7 +322,6 @@ def get_graph_context(query: str) -> str:
         )
         parts = []
         with driver.session() as session:
-            # Jurisdiction profiles
             r = session.run(
                 "MATCH (j:Jurisdiction) "
                 "RETURN j.name AS city, j.state_code AS state, j.population AS pop, j.hazard_type AS hazard"
@@ -214,7 +332,6 @@ def get_graph_context(query: str) -> str:
                     f"{p['city']} ({p['state']}, hazard: {p['hazard']})" for p in profiles
                 ))
 
-            # Amendment timelines
             r = session.run(
                 "MATCH (j:Jurisdiction)-[:AMENDMENT_EVENT]->(ae:AmendmentEvent) "
                 "WHERE ae.is_amended = true "
@@ -230,7 +347,6 @@ def get_graph_context(query: str) -> str:
                     f"{city}: {', '.join(edits)}" for city, edits in by_city.items()
                 ))
 
-            # Code editions
             r = session.run(
                 "MATCH (ce:CodeEdition) "
                 "RETURN ce.jurisdiction_id AS jurisdiction, ce.edition_name AS name, ce.edition_year AS year "
@@ -250,13 +366,9 @@ def get_graph_context(query: str) -> str:
 
 def generate_answer(query: str) -> str:
     """Full hybrid RAG pipeline: graph context + vector retrieval + GPT-4o."""
-    # Get graph context
     graph_ctx = get_graph_context(query)
-
-    # Get vector passages
     chunks = vector_retrieve(query, top_k=8)
 
-    # Group by city for structured context
     by_city = {}
     for c in chunks:
         meta = c.get("metadata", {})
@@ -268,7 +380,6 @@ def generate_answer(query: str) -> str:
         for city, texts in by_city.items()
     )
 
-    # Count sources for display
     source_cities = list(by_city.keys())
     source_count = len(chunks)
 
@@ -298,45 +409,43 @@ def generate_answer(query: str) -> str:
 
     return response.content, source_cities, source_count
 
-# ─── Chat Interface ───────────────────────────────────────────────────────────
 
-# Initialize chat history
-if "policy_messages" not in st.session_state:
-    st.session_state.policy_messages = []
+# ─── Chat Interface (inside tab_chat) ────────────────────────────────────────
 
-# Display chat history
-for msg in st.session_state.policy_messages:
-    if isinstance(msg, dict):
-        with st.chat_message(msg["role"]):
-            st.markdown(msg["content"])
-            if msg.get("sources"):
-                st.caption(f"Sources: {msg['sources']}")
+with tab_chat:
 
-# Handle preset or typed input
-user_input = st.chat_input("Ask about building code amendments across cities...")
+    if "policy_messages" not in st.session_state:
+        st.session_state.policy_messages = []
 
-if selected_preset:
-    user_input = selected_preset
+    for msg in st.session_state.policy_messages:
+        if isinstance(msg, dict):
+            with st.chat_message(msg["role"]):
+                st.markdown(msg["content"])
+                if msg.get("sources"):
+                    st.caption(f"Sources: {msg['sources']}")
 
-if user_input:
-    # Show user message
-    with st.chat_message("user"):
-        st.markdown(user_input)
-    st.session_state.policy_messages.append({"role": "user", "content": user_input})
+    user_input = st.chat_input("Ask about building code amendments across cities...")
 
-    # Generate response
-    with st.chat_message("assistant"):
-        with st.spinner("Searching 12,000+ code passages across 8 cities..."):
-            t0 = time.time()
-            answer, source_cities, source_count = generate_answer(user_input)
-            elapsed = time.time() - t0
+    if selected_preset:
+        user_input = selected_preset
 
-        st.markdown(answer)
-        source_text = f"{source_count} passages from {', '.join(source_cities)} ({elapsed:.1f}s)"
-        st.caption(f"Sources: {source_text}")
+    if user_input:
+        with st.chat_message("user"):
+            st.markdown(user_input)
+        st.session_state.policy_messages.append({"role": "user", "content": user_input})
 
-    st.session_state.policy_messages.append({
-        "role": "assistant",
-        "content": answer,
-        "sources": source_text,
-    })
+        with st.chat_message("assistant"):
+            with st.spinner(f"Searching 12,000+ code passages across {len(CITIES)} cities..."):
+                t0 = time.time()
+                answer, source_cities, source_count = generate_answer(user_input)
+                elapsed = time.time() - t0
+
+            st.markdown(answer)
+            source_text = f"{source_count} passages from {', '.join(source_cities)} ({elapsed:.1f}s)"
+            st.caption(f"Sources: {source_text}")
+
+        st.session_state.policy_messages.append({
+            "role": "assistant",
+            "content": answer,
+            "sources": source_text,
+        })

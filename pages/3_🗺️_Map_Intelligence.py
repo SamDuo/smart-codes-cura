@@ -49,7 +49,7 @@ st.markdown("""
 
 # ─── California Zones ───────────────────────────────────────────────────────
 
-CALIFORNIA_ZONES = [
+ZONES = [
     {
         "name": "Downtown Los Angeles",
         "lat": 34.0407, "lon": -118.2468,
@@ -128,11 +128,77 @@ CALIFORNIA_ZONES = [
         "key_amendments": "Energy Conservation Code, Fire Code amendments, Residential sprinkler requirements",
         "color": "#f39c12",
     },
+    # ─── Non-California cities ───────────────────────────────────────────────
+    {
+        "name": "Downtown Phoenix",
+        "lat": 33.4484, "lon": -112.0740,
+        "city": "Phoenix",
+        "zoning": "Downtown Code (DTC)",
+        "max_height": "250 ft (with bonuses)",
+        "far": "Varies by district",
+        "code_edition": "2024 IBC (Phoenix Amendments)",
+        "hazards": ["Extreme Heat"],
+        "climate_provisions": "Heat mitigation, Cool roof incentives, Shade requirements for parking",
+        "key_amendments": "2024 IBC/IRC adoption, EV charging provisions, Energy code updates",
+        "color": "#e67e22",
+    },
+    {
+        "name": "Henderson Town Center",
+        "lat": 36.0395, "lon": -114.9817,
+        "city": "Henderson",
+        "zoning": "TC (Town Center Mixed Use)",
+        "max_height": "Varies by sub-area",
+        "far": "2.0 - 6.0",
+        "code_edition": "2024 IBC (Henderson Amendments)",
+        "hazards": ["Seismic"],
+        "climate_provisions": "Energy efficiency requirements, Water conservation mandates",
+        "key_amendments": "2024 IBC/IRC adoption, Seismic amendments, Swimming pool barriers",
+        "color": "#27ae60",
+    },
+    {
+        "name": "Downtown Reno",
+        "lat": 39.5296, "lon": -119.8138,
+        "city": "Reno",
+        "zoning": "DC (Downtown Core)",
+        "max_height": "No limit in core",
+        "far": "Varies",
+        "code_edition": "2024 IBC (Reno Amendments)",
+        "hazards": ["Seismic", "Wildfire (WUI)"],
+        "climate_provisions": "Wildland-urban interface code, Snow load requirements",
+        "key_amendments": "2024 IBC adoption, Fire code amendments, Wildfire-resilient construction",
+        "color": "#16a085",
+    },
+    {
+        "name": "Old Scottsdale",
+        "lat": 33.4942, "lon": -111.9261,
+        "city": "Scottsdale",
+        "zoning": "Downtown (D/DMU-2)",
+        "max_height": "150 ft (with bonuses)",
+        "far": "Varies by sub-district",
+        "code_edition": "2021 IBC (Scottsdale Amendments)",
+        "hazards": ["Extreme Heat"],
+        "climate_provisions": "Desert-adapted landscaping, Heat island mitigation",
+        "key_amendments": "2021 IBC adoption, Green building incentives",
+        "color": "#d35400",
+    },
+    {
+        "name": "Midtown Atlanta",
+        "lat": 33.7866, "lon": -84.3830,
+        "city": "Atlanta",
+        "zoning": "SPI-17 (Midtown Special Public Interest)",
+        "max_height": "No limit (varies by sub-area)",
+        "far": "Varies by sub-area",
+        "code_edition": "2024 IBC (GA State Amendments)",
+        "hazards": ["Heat", "Stormwater flooding"],
+        "climate_provisions": "Cool Roof Ordinance 25-O-1310, Green building incentives, Stormwater management",
+        "key_amendments": "GA DCA 2024 IBC Amendments, Cool Roof Ordinance, Municipal building regulations",
+        "color": "#8e44ad",
+    },
 ]
 
 # ─── Header ──────────────────────────────────────────────────────────────────
 
-st.markdown("## 🗺️ GT CURA Map Intelligence — California")
+st.markdown("## GT CURA Map Intelligence")
 st.markdown("*Click on any zone to see building code requirements, hazard exposure, and amendments*")
 
 # ─── Layout: Map + Details ────────────────────────────────────────────────────
@@ -141,12 +207,12 @@ col_map, col_detail = st.columns([3, 2])
 
 with col_map:
     m = folium.Map(
-        location=[34.0, -118.0],
-        zoom_start=8,
+        location=[35.5, -100.0],
+        zoom_start=4,
         tiles="CartoDB positron",
     )
 
-    for zone in CALIFORNIA_ZONES:
+    for zone in ZONES:
         popup_html = f"""
         <b>{zone['name']}</b> ({zone['city']})<br>
         Zoning: {zone['zoning']}<br>
@@ -177,7 +243,7 @@ with col_detail:
         click_lon = map_data["last_object_clicked"].get("lng", 0)
 
         min_dist = float("inf")
-        for zone in CALIFORNIA_ZONES:
+        for zone in ZONES:
             dist = (zone["lat"] - click_lat) ** 2 + (zone["lon"] - click_lon) ** 2
             if dist < min_dist:
                 min_dist = dist
@@ -280,12 +346,12 @@ with col_detail:
 
         st.divider()
 
-        st.markdown("#### California Cities Overview")
+        st.markdown("#### Cities Overview")
         st.markdown("""
-        - **Los Angeles** (3.9M) — 2019 CBC, Seismic Zone D, Wildfire VHFHSZ, Earthquake Hazard Reduction chapters 88-96
-        - **San Diego** (1.4M) — 2025 CBC, Coastal + Seismic, Climate Action Plan, Zero-net-energy target
-        - **Irvine** (308K) — 2025 CBC, CalGreen Tier 1, EV charging mandates, Swimming pool code
-        - **Santa Clarita** (229K) — 2025 CBC, Wildland-urban interface, Defensible space, Energy conservation
+        **California** — Los Angeles, San Diego, Irvine, Santa Clarita (CBC base code)
+        **Arizona** — Phoenix, Scottsdale (IBC base code, Extreme Heat focus)
+        **Nevada** — Henderson, Reno (IBC base code, Seismic focus)
+        **Georgia** — Atlanta (IBC base code, Heat + Stormwater focus)
         """)
 
 # ─── Bottom: All Cities ──────────────────────────────────────────────────────
@@ -293,7 +359,7 @@ with col_detail:
 st.divider()
 st.markdown("### All Cities in Dataset")
 
-comp_cols = st.columns(4)
+comp_cols = st.columns(5)
 cities_list = [
     ("Los Angeles, CA", "3.9M", "Seismic, Wildfire", "CBC"),
     ("San Diego, CA", "1.4M", "Seismic, Coastal", "CBC"),
@@ -303,10 +369,11 @@ cities_list = [
     ("Henderson, NV", "325K", "Seismic", "IBC"),
     ("Reno, NV", "264K", "Seismic, Wildfire", "IBC"),
     ("Scottsdale, AZ", "241K", "Extreme Heat", "IBC"),
+    ("Atlanta, GA", "498K", "Heat, Stormwater", "IBC"),
 ]
 
 for i, (city, pop, hazard, code) in enumerate(cities_list):
-    with comp_cols[i % 4]:
+    with comp_cols[i % 5]:
         st.markdown(f"**{city}**")
         st.caption(f"Pop: {pop} | {hazard}")
         st.caption(f"Base: {code}")

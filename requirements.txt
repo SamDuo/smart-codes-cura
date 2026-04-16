@@ -13,3 +13,5 @@ folium
 streamlit-folium
 python-dotenv
 supabase
+plotly
+pandas
