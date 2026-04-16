@@ -85,7 +85,7 @@ def _dedupe_by_source(chunks: list, top_k: int, max_per_source: int = 2) -> list
     return result
 
 
-MIN_SIMILARITY = 0.3  # Filter out chunks below this relevance threshold
+MIN_SIMILARITY = 0.4  # Filter out chunks below this relevance threshold
 
 NAN_ANSWER = (
     "I don't have sufficient information in our building code database to answer this question. "
