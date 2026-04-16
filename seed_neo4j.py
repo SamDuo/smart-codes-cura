@@ -35,6 +35,7 @@ CITIES = {
     "San Diego": {"state": "CA", "population": 1385061, "model_code": "CBC"},
     "Santa Clarita": {"state": "CA", "population": 229021, "model_code": "CBC"},
     "Scottsdale": {"state": "AZ", "population": 241361, "model_code": "IBC"},
+    "Atlanta": {"state": "GA", "population": 498044, "model_code": "IBC"},
 }
 
 # Amendment adoption data from Amendments.xlsx
@@ -93,6 +94,11 @@ ADOPTIONS = {
     ],
     "Scottsdale": [
         {"year": 2021, "type": "BC", "edition": "2021_IBC"},
+    ],
+    "Atlanta": [
+        {"year": 2024, "type": "BC", "edition": "2024_IBC"},
+        {"year": 2026, "type": "BC", "edition": "2024_IBC_GA_Amendments"},
+        {"year": 2025, "type": "Ordinance", "edition": "Cool_Roof_25-O-1310"},
     ],
 }
 

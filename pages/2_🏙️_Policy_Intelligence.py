@@ -56,6 +56,7 @@ CITIES = {
     "Santa Clarita": {"state": "CA", "pop": "229K", "hazard": "Wildfire", "base": "CBC", "docs": 5, "years": "2013-2025"},
     "Reno": {"state": "NV", "pop": "264K", "hazard": "Seismic, Wildfire", "base": "IBC", "docs": 3, "years": "2012-2024"},
     "Scottsdale": {"state": "AZ", "pop": "241K", "hazard": "Extreme Heat", "base": "IBC", "docs": 1, "years": "2021"},
+    "Atlanta": {"state": "GA", "pop": "498K", "hazard": "Heat, Stormwater", "base": "IBC", "docs": 4, "years": "2024-2026"},
 }
 
 # ─── Custom CSS ───────────────────────────────────────────────────────────────

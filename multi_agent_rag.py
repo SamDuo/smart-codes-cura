@@ -85,6 +85,24 @@ def _dedupe_by_source(chunks: list, top_k: int, max_per_source: int = 2) -> list
     return result
 
 
+MIN_SIMILARITY = 0.3  # Filter out chunks below this relevance threshold
+
+NAN_ANSWER = (
+    "I don't have sufficient information in our building code database to answer this question. "
+    "Our current coverage includes: Los Angeles, San Diego, Phoenix, Irvine, Henderson, "
+    "Santa Clarita, Reno, Scottsdale, and Atlanta. "
+    "Try rephrasing your question or asking about a specific city and topic within our coverage."
+)
+
+REFUSAL_RULES = (
+    "- If the context does not contain information relevant to the question, say: "
+    "\"I don't have sufficient information in our building code database to answer this question.\"\n"
+    "- Do NOT guess, infer, or extrapolate beyond what the context explicitly states.\n"
+    "- Do NOT fabricate section numbers, code requirements, dates, or ordinance numbers.\n"
+    "- It is better to say you don't know than to provide an inaccurate answer.\n"
+)
+
+
 def vector_search(query: str, top_k: int = 5, city_filter: str = None) -> list:
     """Vector search with optional city metadata filtering and source diversity."""
     emb = embeddings.embed_query(query)
@@ -119,6 +137,9 @@ def vector_search(query: str, top_k: int = 5, city_filter: str = None) -> list:
             timeout=30,
         )
         chunks = res.json() if res.status_code == 200 else []
+
+    # Filter out low-relevance chunks to prevent hallucination
+    chunks = [c for c in chunks if c.get("similarity", 0) >= MIN_SIMILARITY]
 
     return _dedupe_by_source(chunks, top_k)
 
@@ -302,16 +323,18 @@ def factual_agent(question: str, cities: list) -> str:
     """Handle single-fact lookups with focused retrieval."""
     city_filter = cities[0] if cities else None
     chunks = vector_search(question, top_k=5, city_filter=city_filter)
+
+    if not chunks:
+        return NAN_ANSWER
+
     context = chunks_to_context(chunks)
 
     response = answer_llm.invoke(
-        "You are a building code expert. Answer this factual question using the provided context.\n\n"
+        "You are a building code expert. Answer this factual question using ONLY the provided context.\n\n"
         "RULES:\n"
-        "- Base your answer on the context below. Cite specific section numbers and source documents.\n"
-        "- If the context contains relevant information, extract and present it even if it only partially answers the question.\n"
-        "- If a table in the context contains the data needed, read and cite the specific values.\n"
-        "- Do NOT fabricate section numbers or requirements not present in the context.\n"
-        "- Only say you cannot answer if the context is truly unrelated to the question.\n\n"
+        f"{REFUSAL_RULES}"
+        "- Base your answer strictly on the context below. Cite specific section numbers and source documents.\n"
+        "- If a table in the context contains the data needed, read and cite the specific values.\n\n"
         f"Context:\n{context}\n\n"
         f"Question: {question}"
     )
@@ -353,20 +376,24 @@ def cross_jurisdiction_agent(question: str, cities: list) -> str:
 
     combined_context = "\n\n".join(city_contexts)
 
+    # Guard: if no city had relevant passages and graph is empty
+    has_passages = any(not ctx.startswith("[No results found") for ctx in city_contexts)
+    if not has_passages and "[No" in graph_text:
+        return NAN_ANSWER
+
     response = answer_llm.invoke(
         "You are a building code expert comparing amendments across US cities.\n\n"
         "RULES:\n"
+        f"{REFUSAL_RULES}"
         "- Base your answer on the KNOWLEDGE GRAPH DATA and RETRIEVED PASSAGES below.\n"
-        "- Do NOT fabricate section numbers, ordinance numbers, or code requirements.\n"
-        "- If the context contains relevant information, extract and present it.\n"
-        "- Use graph data for structural facts (base codes, timelines, profiles) even if passages are sparse.\n\n"
+        "- Only use graph data for structural facts (base codes, timelines) that are explicitly present.\n\n"
         "Instructions:\n"
         "1. Use the KNOWLEDGE GRAPH DATA for city profiles, base codes, and adoption timelines\n"
         "2. Use the RETRIEVED PASSAGES for specific code section content and amendments\n"
         "3. For EACH city mentioned, describe their specific requirements from the evidence\n"
         "4. Highlight KEY DIFFERENCES between cities\n"
         "5. Cite specific section numbers and amendment sources\n"
-        "6. If information for a city is limited, state what you found and what is missing\n\n"
+        "6. If information for a city is not found in the context, clearly state that rather than guessing\n\n"
         f"KNOWLEDGE GRAPH DATA:\n{graph_text}\n\n"
         f"RETRIEVED PASSAGES (per-city):\n{combined_context}\n\n"
         f"Question: {question}"
@@ -400,19 +427,24 @@ def temporal_agent(question: str, cities: list) -> str:
 
     combined = "\n\n".join(contexts)
 
+    # Guard: if no relevant passages and graph is empty
+    has_passages = any(not ctx.startswith("[No results found") for ctx in contexts)
+    if not has_passages and "[No" in graph_text:
+        return NAN_ANSWER
+
     response = answer_llm.invoke(
         "You are a building code expert analyzing how codes have changed over time.\n\n"
         "RULES:\n"
+        f"{REFUSAL_RULES}"
         "- Base your answer on the KNOWLEDGE GRAPH DATA and RETRIEVED PASSAGES below.\n"
-        "- Do NOT fabricate dates, edition numbers, or adoption timelines.\n"
-        "- Use graph data for timeline facts even if passages provide limited detail.\n\n"
+        "- Only use graph data for timeline facts that are explicitly present.\n\n"
         "Instructions:\n"
         "1. Use the KNOWLEDGE GRAPH DATA for the official adoption timeline and code editions\n"
         "2. Use the RETRIEVED PASSAGES for specific amendment content and section details\n"
         "3. Present information chronologically\n"
         "4. Highlight what CHANGED between editions/years based on evidence\n"
         "5. Cite specific ordinance numbers and amendment dates\n"
-        "6. If only partial data is available, present what you have and note gaps\n\n"
+        "6. If information is not available for a time period, clearly state that\n\n"
         f"KNOWLEDGE GRAPH DATA:\n{graph_text}\n\n"
         f"RETRIEVED PASSAGES:\n{combined}\n\n"
         f"Question: {question}"
@@ -450,18 +482,21 @@ def compliance_agent(question: str, cities: list) -> str:
 
     context = chunks_to_context(unique_chunks[:8])
 
+    if not unique_chunks:
+        return NAN_ANSWER
+
     response = answer_llm.invoke(
         "You are a building code compliance expert.\n\n"
         "RULES:\n"
-        "- Base your answer on the context below. Do NOT fabricate code sections or requirements.\n"
-        "- If the context contains relevant information, extract and present it.\n"
-        "- If the context only covers some conditions, answer what you can and note the gaps.\n\n"
+        f"{REFUSAL_RULES}"
+        "- Base your answer strictly on the context below.\n"
+        "- If the context only covers some conditions, answer what you can and explicitly mark missing items as NOT FOUND.\n\n"
         "Instructions:\n"
         "1. Address EACH condition/requirement mentioned in the question using context evidence\n"
         "2. Cite specific code sections for each requirement found in context\n"
         "3. Note any exceptions or special provisions from the context\n"
         "4. Provide a compliance summary based on available evidence\n"
-        "5. Note which requirements could not be verified from the context\n\n"
+        "5. For requirements NOT found in the context, explicitly state: 'NOT FOUND in available documents'\n\n"
         f"Context:\n{context}\n\n"
         f"Question: {question}"
     )
@@ -472,14 +507,23 @@ def compliance_agent(question: str, cities: list) -> str:
 
 
 def validate_citations(answer: str, question: str) -> str:
-    """Quick validation pass to catch obvious hallucinations."""
+    """Validation pass to catch hallucinations and fabricated citations."""
+    # Skip validation for NaN answers
+    if "don't have sufficient information" in answer:
+        return answer
+
     validation = classifier_llm.invoke(
-        "Review this building code answer for accuracy.\n"
-        "Check: Are the cited section numbers plausible? Are city names correct?\n"
-        "If you find obvious errors, note them. Otherwise say VALID.\n"
+        "Review this building code answer for accuracy. Check:\n"
+        "1. Are cited section numbers real and plausible (not fabricated)?\n"
+        "2. Are city names correct and consistent with the question?\n"
+        "3. Does the answer claim specific requirements without citing a source?\n"
+        "4. Does the answer mention cities or jurisdictions not asked about?\n\n"
+        "If you find fabricated citations, unsupported claims, or incorrect city references, "
+        "respond with: ISSUES: [describe problems]\n"
+        "If the answer is well-supported by citations, respond with: VALID\n"
         "Be brief (1-2 sentences max).\n\n"
         f"Question: {question}\n"
-        f"Answer: {answer[:500]}\n\n"
+        f"Answer: {answer[:800]}\n\n"
         f"Validation:"
     )
 
