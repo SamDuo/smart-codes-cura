@@ -18,6 +18,35 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 st.set_page_config(page_title="Agentic RAG Chatbot", page_icon="🤖", layout="wide")
 
+st.markdown("""
+<style>
+    .block-container { padding-top: 2rem; max-width: 1200px; }
+    .agent-badge {
+        display: inline-block;
+        background: #eef1f8;
+        color: #667eea;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+    }
+    .example-chip button {
+        background: #f5f7fb !important;
+        border: 1px solid #e2e6ee !important;
+        color: #4a5568 !important;
+        font-size: 0.88rem !important;
+        border-radius: 20px !important;
+        padding: 6px 14px !important;
+    }
+    .example-chip button:hover {
+        border-color: #667eea !important;
+        color: #667eea !important;
+        background: #eef1f8 !important;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 ### LOAD CONFIG ###
 
 
@@ -122,37 +151,42 @@ def stream_multi_agent(question: str):
 ### SIDEBAR ###
 
 with st.sidebar:
-    st.title("Settings")
+    st.markdown("### Settings")
 
     mode = st.radio(
-        "Retrieval Mode",
+        "Retrieval mode",
         ["Multi-Agent RAG", "Baseline (Vector-Only)"],
         index=0,
         help="Multi-Agent uses specialist agents for different question types. "
              "Baseline uses simple vector search.",
     )
 
-    st.divider()
-
-    if mode == "Multi-Agent RAG":
-        st.markdown("**Active Agents:**")
-        st.markdown(
-            "- Classifier (GPT-4o-mini)\n"
-            "- Factual Agent\n"
-            "- Cross-Jurisdiction Agent\n"
-            "- Temporal Agent\n"
-            "- Compliance Agent\n"
-            "- Citation Validator"
-        )
-        st.markdown("**Data Sources:**")
-        st.markdown("- Supabase pgvector (12,280 chunks)\n- Neo4j Knowledge Graph")
-    else:
-        st.markdown("**Pipeline:**")
-        st.markdown("Vector search (top-5) -> GPT-4o")
-        st.markdown("**Data Source:**")
-        st.markdown("- Supabase pgvector (12,280 chunks)")
+    if st.button("Clear chat history", use_container_width=True):
+        st.session_state.messages = []
+        st.rerun()
 
     st.divider()
+
+    with st.expander("Active pipeline", expanded=True):
+        if mode == "Multi-Agent RAG":
+            st.markdown(
+                "**Agents**\n"
+                "- Classifier (gpt-4o-mini)\n"
+                "- Factual · Cross-Jurisdiction\n"
+                "- Temporal · Compliance\n"
+                "- Citation Validator\n\n"
+                "**Data**\n"
+                "- Supabase pgvector (12,280 chunks)\n"
+                "- Neo4j knowledge graph"
+            )
+        else:
+            st.markdown(
+                "**Pipeline**\n"
+                "Vector search (top-5) → GPT-4o\n\n"
+                "**Data**\n"
+                "- Supabase pgvector (12,280 chunks)"
+            )
+
     st.caption("Powered by GT CURA")
 
 ### MAIN LAYOUT ###
@@ -163,17 +197,36 @@ with col1:
     app_dir = os.path.dirname(os.path.abspath(__file__))
     logo_path = os.path.join(app_dir, "..", "gt_cura_logo.jpg")
     if os.path.exists(logo_path):
-        st.image(logo_path)
+        st.image(logo_path, width=90)
 
 with col2:
     st.header("Building Code Chatbot")
     mode_label = "Multi-Agent RAG" if mode == "Multi-Agent RAG" else "Baseline"
-    st.caption(f"Mode: {mode_label} | 10 cities | 12,280 passages")
+    st.caption(f"Mode: {mode_label}  ·  10 cities  ·  12,280 indexed passages")
 
 ### CHAT ###
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
+
+EXAMPLE_QUERIES = [
+    "How do LA and Phoenix differ on fire protection?",
+    "What seismic requirements apply in California vs Nevada?",
+    "Which cities have the most recent code adoptions?",
+    "What are Atlanta's stormwater amendments?",
+]
+
+# Show example chips only when chat is empty
+if not st.session_state.messages:
+    st.markdown("##### Try an example")
+    chip_cols = st.columns(len(EXAMPLE_QUERIES))
+    for i, (col, q) in enumerate(zip(chip_cols, EXAMPLE_QUERIES)):
+        with col:
+            with st.container():
+                st.markdown('<div class="example-chip">', unsafe_allow_html=True)
+                if st.button(q, key=f"ex_{i}", use_container_width=True):
+                    st.session_state["_preset_query"] = q
+                st.markdown('</div>', unsafe_allow_html=True)
 
 for message in st.session_state.messages:
     if isinstance(message, dict):
@@ -183,6 +236,10 @@ for message in st.session_state.messages:
                 st.caption(message["meta"])
 
 user_question = st.chat_input("Ask about building codes across U.S. cities...")
+
+# Preset from example chip
+if not user_question and st.session_state.get("_preset_query"):
+    user_question = st.session_state.pop("_preset_query")
 
 if user_question:
     st.session_state.messages.append({"role": "user", "content": user_question})
