@@ -9,20 +9,18 @@ Aligned with Lincoln Institute research questions:
 3. Cross-jurisdictional comparison of amendment patterns
 """
 import json
+import os
+
 import httpx
 from neo4j import GraphDatabase
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 
-SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
-SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_KEY", "")
-OPENAI_KEY = (
-    os.environ.get("OPENAI_API_KEY", "")
-    "wYEk2T3BlbkFJAlR5vrcnkrJcXAv-aN81APnep5Rgmww389sjRZQDBB7P3FmTb_LBCFuomBMEiNI"
-    "pV41SFp_yMA"
-)
-NEO4J_URI = os.environ.get("NEO4J_URI", "")
-NEO4J_USER = "neo4j"
-NEO4J_PASSWORD = os.environ.get("NEO4J_PASSWORD", "")
+SUPABASE_URL = os.environ["SUPABASE_URL"]
+SUPABASE_KEY = os.environ["SUPABASE_SERVICE_KEY"]
+OPENAI_KEY = os.environ["OPENAI_API_KEY"]
+NEO4J_URI = os.environ["NEO4J_URI"]
+NEO4J_USER = os.environ.get("NEO4J_USER", "neo4j")
+NEO4J_PASSWORD = os.environ["NEO4J_PASSWORD"]
 
 HEADERS = {"apikey": SUPABASE_KEY, "Authorization": f"Bearer {SUPABASE_KEY}", "Content-Type": "application/json"}
 embeddings = OpenAIEmbeddings(model="text-embedding-3-large", api_key=OPENAI_KEY)

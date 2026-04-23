@@ -1,5 +1,6 @@
 ### IMPORT DEPENDENCIES ###
 
+import logging
 import os
 import sys
 import time
@@ -7,6 +8,8 @@ import time
 import streamlit as st
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 import httpx
+
+logger = logging.getLogger(__name__)
 
 # Add parent directory so we can import multi_agent_rag
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
@@ -58,8 +61,19 @@ embeddings = OpenAIEmbeddings(model="text-embedding-3-large", api_key=OPENAI_API
 ### RETRIEVAL MODES ###
 
 
+BASELINE_MIN_SIMILARITY = 0.4  # Match multi-agent threshold for fair comparison
+BASELINE_NAN = (
+    "I don't have sufficient information in our building code database "
+    "to answer this question."
+)
+
+
 def baseline_answer(question: str) -> str:
-    """Baseline: simple vector search + single LLM call."""
+    """Baseline: simple vector search + single LLM call.
+
+    Uses the same similarity threshold as multi-agent so evaluation comparisons
+    are apples-to-apples.
+    """
     query_embedding = embeddings.embed_query(question)
 
     res = httpx.post(
@@ -69,6 +83,10 @@ def baseline_answer(question: str) -> str:
         timeout=30,
     )
     chunks = res.json() if res.status_code == 200 else []
+    chunks = [c for c in chunks if c.get("similarity", 0) >= BASELINE_MIN_SIMILARITY]
+
+    if not chunks:
+        return BASELINE_NAN
 
     context = "\n\n".join(
         f"Source: {c.get('metadata', {}).get('original_filename', 'unknown')} "
@@ -77,7 +95,9 @@ def baseline_answer(question: str) -> str:
         for c in chunks
     )
 
-    llm = ChatOpenAI(model="gpt-4o", temperature=0, api_key=OPENAI_API_KEY)
+    llm = ChatOpenAI(
+        model="gpt-4o", temperature=0, api_key=OPENAI_API_KEY, request_timeout=30
+    )
     response = llm.invoke(
         f"Based on the following building code documents, answer the question. "
         f"Cite specific code sections and source documents. "
@@ -183,11 +203,18 @@ if user_question:
             last_meta = st.session_state.get("_last_meta", {})
             cached = last_meta.get("cached", False)
             agent_type = last_meta.get("agent", "")
+            validation = last_meta.get("validation")
             cache_tag = " | cached" if cached else ""
             agent_tag = f" | {agent_type}" if agent_type else ""
             meta = f"{mode_label}{agent_tag} | {elapsed:.1f}s{cache_tag}"
-        except Exception as e:
-            answer = f"Error: {e}"
+            if validation:
+                st.warning(f"Validator flagged: {validation}")
+        except Exception:
+            logger.exception("Chatbot answer generation failed")
+            answer = (
+                "Sorry, something went wrong while generating the answer. "
+                "Please try again or rephrase your question."
+            )
             meta = f"{mode_label} | error"
             st.markdown(answer)
 

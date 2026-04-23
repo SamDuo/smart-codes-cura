@@ -13,13 +13,18 @@ Architecture:
 Each agent uses targeted retrieval instead of dumping everything into one prompt.
 """
 
+import atexit
+import logging
 import os
 import re
 from concurrent.futures import ThreadPoolExecutor
+
 import httpx
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 
 from query_cache import SemanticCache
+
+logger = logging.getLogger(__name__)
 
 # â”€â”€â”€ Config (from environment / Streamlit secrets) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
@@ -29,6 +34,8 @@ SUPABASE_KEY = SUPABASE_SERVICE_KEY
 OPENAI_KEY = OPENAI_API_KEY
 NEO4J_AUTH = (NEO4J_USER, NEO4J_PASSWORD)
 
+LLM_TIMEOUT = 30  # seconds — prevent hangs on OpenAI API
+
 HEADERS = {
     "apikey": SUPABASE_KEY,
     "Authorization": f"Bearer {SUPABASE_KEY}",
@@ -37,33 +44,41 @@ HEADERS = {
 
 CANONICAL_CITIES = {
     "losangeles": "Los Angeles", "los angeles": "Los Angeles", "la": "Los Angeles",
+    "l.a.": "Los Angeles",
     "sandiego": "San Diego", "san diego": "San Diego",
     "santaclarita": "Santa Clarita", "santa clarita": "Santa Clarita",
     "phoenix": "Phoenix", "henderson": "Henderson", "irvine": "Irvine",
     "reno": "Reno", "scottsdale": "Scottsdale", "atlanta": "Atlanta",
 }
 
-KNOWN_CITIES = list(set(CANONICAL_CITIES.values()))
-
 
 def normalize_city(name: str) -> str:
     """Normalize city name to canonical form with proper spacing."""
     return CANONICAL_CITIES.get(name.lower().strip(), name)
 
+
 embeddings = OpenAIEmbeddings(model="text-embedding-3-large", api_key=OPENAI_KEY)
-classifier_llm = ChatOpenAI(model="gpt-4o-mini", temperature=0, api_key=OPENAI_KEY)
-answer_llm = ChatOpenAI(model="gpt-4o-mini", temperature=0, api_key=OPENAI_KEY)
-answer_llm_streaming = ChatOpenAI(model="gpt-4o-mini", temperature=0, api_key=OPENAI_KEY, streaming=True)
+classifier_llm = ChatOpenAI(
+    model="gpt-4o-mini", temperature=0, api_key=OPENAI_KEY, request_timeout=LLM_TIMEOUT
+)
+answer_llm = ChatOpenAI(
+    model="gpt-4o-mini", temperature=0, api_key=OPENAI_KEY, request_timeout=LLM_TIMEOUT
+)
+answer_llm_streaming = ChatOpenAI(
+    model="gpt-4o-mini", temperature=0, api_key=OPENAI_KEY,
+    streaming=True, request_timeout=LLM_TIMEOUT,
+)
 
 # Semantic Cache
 _cache = SemanticCache(embed_fn=embeddings.embed_query)
 _seed_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "demo_cache.json")
 _seed_count = _cache.load_seed(_seed_path)
 if _seed_count:
-    print(f"[Cache] Loaded {_seed_count} pre-computed answers")
+    logger.info("Loaded %d pre-computed answers from cache", _seed_count)
 
-# Parallel Retrieval
+# Parallel Retrieval — shared pool shut down cleanly on exit
 _pool = ThreadPoolExecutor(max_workers=4)
+atexit.register(_pool.shutdown, wait=False)
 
 
 
@@ -267,19 +282,32 @@ def graph_retrieve(query: str, cities: list = None) -> str:
     return "\n\n".join(parts)
 
 
-def detect_cities(text: str) -> list:
-    """Detect city names mentioned in the query, returning canonical names."""
-    found = []
-    text_lower = text.lower()
-    city_variants = {
-        "los angeles": "Los Angeles", "la ": "Los Angeles", "l.a.": "Los Angeles",
-        "san diego": "San Diego", "phoenix": "Phoenix",
-        "henderson": "Henderson", "irvine": "Irvine",
-        "reno": "Reno", "santa clarita": "Santa Clarita",
-        "scottsdale": "Scottsdale", "atlanta": "Atlanta",
-    }
-    for name, canonical in city_variants.items():
-        if name in text_lower and canonical not in found:
+# Word-boundary regexes keyed by canonical city. Patterns use explicit \b so
+# "la" won't match "las", "atlanta", "class", etc. "L.A." is handled by escaping.
+_CITY_PATTERNS: list[tuple[re.Pattern, str]] = [
+    (re.compile(r"\blos\s*angeles\b", re.IGNORECASE), "Los Angeles"),
+    (re.compile(r"\bla\b", re.IGNORECASE), "Los Angeles"),
+    (re.compile(r"(?:^|[^a-z0-9])l\.a\.(?![a-z0-9])", re.IGNORECASE), "Los Angeles"),
+    (re.compile(r"\bsan\s*diego\b", re.IGNORECASE), "San Diego"),
+    (re.compile(r"\bphoenix\b", re.IGNORECASE), "Phoenix"),
+    (re.compile(r"\bhenderson\b", re.IGNORECASE), "Henderson"),
+    (re.compile(r"\birvine\b", re.IGNORECASE), "Irvine"),
+    (re.compile(r"\breno\b", re.IGNORECASE), "Reno"),
+    (re.compile(r"\bsanta\s*clarita\b", re.IGNORECASE), "Santa Clarita"),
+    (re.compile(r"\bscottsdale\b", re.IGNORECASE), "Scottsdale"),
+    (re.compile(r"\batlanta\b", re.IGNORECASE), "Atlanta"),
+]
+
+
+def detect_cities(text: str) -> list[str]:
+    """Detect city names in the query, returning canonical names.
+
+    Uses word-boundary regex so 'la' won't match 'las vegas', 'class', etc.
+    Returns ordered, unique list.
+    """
+    found: list[str] = []
+    for pattern, canonical in _CITY_PATTERNS:
+        if pattern.search(text) and canonical not in found:
             found.append(canonical)
     return found
 
@@ -506,11 +534,18 @@ def compliance_agent(question: str, cities: list) -> str:
 # â”€â”€â”€ Agent 6: Citation Validator â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
-def validate_citations(answer: str, question: str) -> str:
-    """Validation pass to catch hallucinations and fabricated citations."""
+def validate_citations(answer: str, question: str) -> tuple[str, str | None]:
+    """Validation pass to catch hallucinations and fabricated citations.
+
+    Returns:
+        (answer, note): ``note`` is None when the answer is valid, otherwise a
+        short string describing what the validator flagged. The answer itself
+        is never mutated, so callers decide whether to surface the note, log
+        it, or discard it.
+    """
     # Skip validation for NaN answers
     if "don't have sufficient information" in answer:
-        return answer
+        return answer, None
 
     validation = classifier_llm.invoke(
         "Review this building code answer for accuracy. Check:\n"
@@ -529,16 +564,18 @@ def validate_citations(answer: str, question: str) -> str:
 
     validation_text = validation.content.strip()
     if "valid" in validation_text.lower():
-        return answer
-    else:
-        return answer + f"\n\n_Note: {validation_text}_"
+        return answer, None
+    return answer, validation_text
 
 
 # â”€â”€â”€ Main Pipeline â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 def multi_agent_answer(question: str, return_chunks: bool = False):
-    """Full multi-agent RAG pipeline.
+    """Full multi-agent RAG pipeline (non-streaming).
+
+    Shares retrieval with the streaming path via ``_build_prompt_for_agent``,
+    so each question only hits Supabase/Neo4j once (not twice as before).
 
     Args:
         question: The user question.
@@ -547,35 +584,23 @@ def multi_agent_answer(question: str, return_chunks: bool = False):
     Returns:
         str or (str, list) depending on return_chunks.
     """
-
-    # Step 1: Classify
     classification = classify_query(question)
     category = classification["category"]
     cities = classification["cities"]
 
-    # Step 2: Route to specialist agent (collect chunks for eval)
-    collected_chunks = []
-    if category == "cross_jurisdiction":
-        answer = cross_jurisdiction_agent(question, cities)
-        # Retrieve chunks for eval context
-        for city in cities[:3]:
-            collected_chunks.extend(vector_search(question, top_k=3, city_filter=city))
-    elif category == "temporal":
-        answer = temporal_agent(question, cities)
-        collected_chunks.extend(vector_search(question, top_k=5))
-    elif category == "compliance":
-        answer = compliance_agent(question, cities)
-        collected_chunks.extend(vector_search(question, top_k=5, city_filter=cities[0] if cities else None))
-    else:
-        city_filter = cities[0] if cities else None
-        answer = factual_agent(question, cities)
-        collected_chunks.extend(vector_search(question, top_k=5, city_filter=city_filter))
+    prompt, chunks = _build_prompt_for_agent(question, category, cities)
 
-    # Step 3: Validate citations
-    answer = validate_citations(answer, question)
+    # Guard: no relevant retrieval → short-circuit instead of calling LLM
+    if not chunks:
+        answer = NAN_ANSWER
+    else:
+        answer = answer_llm.invoke(prompt).content
+        answer, validation_note = validate_citations(answer, question)
+        if validation_note:
+            logger.warning("Validator flagged answer: %s", validation_note)
 
     if return_chunks:
-        return answer, collected_chunks
+        return answer, chunks
     return answer
 
 
@@ -605,7 +630,7 @@ if __name__ == "__main__":
 
 def _build_prompt_for_agent(question: str, category: str, cities: list) -> tuple[str, list]:
     """Build the LLM prompt and collect chunks for a given question category.
-    Returns (prompt_string, chunks_list)."""
+    Returns (prompt_string, chunks_list). Empty chunks list signals no-retrieval → NaN answer."""
     if category == "cross_jurisdiction":
         if not cities:
             cities_response = classifier_llm.invoke(
@@ -639,17 +664,16 @@ def _build_prompt_for_agent(question: str, category: str, cities: list) -> tuple
         prompt = (
             "You are a building code expert comparing amendments across US cities.\n\n"
             "RULES:\n"
+            f"{REFUSAL_RULES}"
             "- Base your answer on the KNOWLEDGE GRAPH DATA and RETRIEVED PASSAGES below.\n"
-            "- Do NOT fabricate section numbers, ordinance numbers, or code requirements.\n"
-            "- If the context contains relevant information, extract and present it.\n"
-            "- Use graph data for structural facts (base codes, timelines, profiles) even if passages are sparse.\n\n"
+            "- Only use graph data for structural facts (base codes, timelines) that are explicitly present.\n\n"
             "Instructions:\n"
             "1. Use the KNOWLEDGE GRAPH DATA for city profiles, base codes, and adoption timelines\n"
             "2. Use the RETRIEVED PASSAGES for specific code section content and amendments\n"
             "3. For EACH city mentioned, describe their specific requirements from the evidence\n"
             "4. Highlight KEY DIFFERENCES between cities\n"
             "5. Cite specific section numbers and amendment sources\n"
-            "6. If information for a city is limited, state what you found and what is missing\n\n"
+            "6. If information for a city is not found in the context, clearly state that rather than guessing\n\n"
             f"KNOWLEDGE GRAPH DATA:\n{graph_text}\n\n"
             f"RETRIEVED PASSAGES (per-city):\n{combined}\n\n"
             f"Question: {question}"
@@ -675,16 +699,16 @@ def _build_prompt_for_agent(question: str, category: str, cities: list) -> tuple
         prompt = (
             "You are a building code expert analyzing how codes have changed over time.\n\n"
             "RULES:\n"
+            f"{REFUSAL_RULES}"
             "- Base your answer on the KNOWLEDGE GRAPH DATA and RETRIEVED PASSAGES below.\n"
-            "- Do NOT fabricate dates, edition numbers, or adoption timelines.\n"
-            "- Use graph data for timeline facts even if passages provide limited detail.\n\n"
+            "- Only use graph data for timeline facts that are explicitly present.\n\n"
             "Instructions:\n"
             "1. Use the KNOWLEDGE GRAPH DATA for the official adoption timeline and code editions\n"
             "2. Use the RETRIEVED PASSAGES for specific amendment content and section details\n"
             "3. Present information chronologically\n"
             "4. Highlight what CHANGED between editions/years based on evidence\n"
             "5. Cite specific ordinance numbers and amendment dates\n"
-            "6. If only partial data is available, present what you have and note gaps\n\n"
+            "6. If information is not available for a time period, clearly state that\n\n"
             f"KNOWLEDGE GRAPH DATA:\n{graph_text}\n\n"
             f"RETRIEVED PASSAGES:\n{combined}\n\n"
             f"Question: {question}"
@@ -701,16 +725,27 @@ def _build_prompt_for_agent(question: str, category: str, cities: list) -> tuple
         for sq in sub_queries[:3]:
             chunks = vector_search(sq, top_k=3, city_filter=cities[0] if cities else None)
             all_chunks.extend(chunks)
-        seen = set()
-        unique = [c for c in all_chunks if c.get("content", "")[:100] not in seen and not seen.add(c.get("content", "")[:100])]
+        seen: set[str] = set()
+        unique = []
+        for c in all_chunks:
+            key = c.get("content", "")[:100]
+            if key not in seen:
+                seen.add(key)
+                unique.append(c)
         context = chunks_to_context(unique[:8])
 
         prompt = (
             "You are a building code compliance expert.\n\n"
             "RULES:\n"
-            "- Base your answer on the context below. Do NOT fabricate code sections or requirements.\n"
-            "- If the context contains relevant information, extract and present it.\n"
-            "- If the context only covers some conditions, answer what you can and note the gaps.\n\n"
+            f"{REFUSAL_RULES}"
+            "- Base your answer strictly on the context below.\n"
+            "- If the context only covers some conditions, answer what you can and explicitly mark missing items as NOT FOUND.\n\n"
+            "Instructions:\n"
+            "1. Address EACH condition/requirement mentioned in the question using context evidence\n"
+            "2. Cite specific code sections for each requirement found in context\n"
+            "3. Note any exceptions or special provisions from the context\n"
+            "4. Provide a compliance summary based on available evidence\n"
+            "5. For requirements NOT found in the context, explicitly state: 'NOT FOUND in available documents'\n\n"
             f"Context:\n{context}\n\n"
             f"Question: {question}"
         )
@@ -722,13 +757,11 @@ def _build_prompt_for_agent(question: str, category: str, cities: list) -> tuple
         context = chunks_to_context(chunks)
 
         prompt = (
-            "You are a building code expert. Answer this factual question using the provided context.\n\n"
+            "You are a building code expert. Answer this factual question using ONLY the provided context.\n\n"
             "RULES:\n"
-            "- Base your answer on the context below. Cite specific section numbers and source documents.\n"
-            "- If the context contains relevant information, extract and present it even if it only partially answers the question.\n"
-            "- If a table in the context contains the data needed, read and cite the specific values.\n"
-            "- Do NOT fabricate section numbers or requirements not present in the context.\n"
-            "- Only say you cannot answer if the context is truly unrelated to the question.\n\n"
+            f"{REFUSAL_RULES}"
+            "- Base your answer strictly on the context below. Cite specific section numbers and source documents.\n"
+            "- If a table in the context contains the data needed, read and cite the specific values.\n\n"
             f"Context:\n{context}\n\n"
             f"Question: {question}"
         )
@@ -744,13 +777,14 @@ def stream_multi_agent_answer(question: str):
 
     Yields:
         str tokens, or full cached answer as single yield.
-        Final yield is a dict with metadata: {"_meta": {"cached": bool}}
+        Final yield is a dict with metadata:
+            {"_meta": {"agent": str, "cached": bool, "validation": str | None}}
     """
     # Step 0: Check semantic cache
     cached = _cache.lookup(question)
     if cached:
         yield cached
-        yield {"_meta": {"cached": True}}
+        yield {"_meta": {"agent": "cache", "cached": True, "validation": None}}
         return
 
     # Step 1: Classify (fast, non-streaming)
@@ -759,7 +793,13 @@ def stream_multi_agent_answer(question: str):
     cities = classification["cities"]
 
     # Step 2: Build prompt with retrieval (non-streaming, uses parallel)
-    prompt, _ = _build_prompt_for_agent(question, category, cities)
+    prompt, chunks = _build_prompt_for_agent(question, category, cities)
+
+    # Guard: no relevant retrieval → return NaN answer instead of calling LLM
+    if not chunks:
+        yield NAN_ANSWER
+        yield {"_meta": {"agent": category, "cached": False, "validation": "no_context"}}
+        return
 
     # Step 3: Stream the answer
     full_answer = []
@@ -768,9 +808,15 @@ def stream_multi_agent_answer(question: str):
             full_answer.append(chunk.content)
             yield chunk.content
 
-    # Step 4: Store in cache for future queries
     answer_text = "".join(full_answer)
+
+    # Step 4: Validate citations (non-blocking to user — already streamed)
+    validation_note: str | None = None
     if answer_text:
+        _, validation_note = validate_citations(answer_text, question)
+
+    # Step 5: Store in cache only if validation passed
+    if answer_text and validation_note is None:
         _cache.store(question, answer_text)
 
-    yield {"_meta": {"cached": False}}
+    yield {"_meta": {"agent": category, "cached": False, "validation": validation_note}}

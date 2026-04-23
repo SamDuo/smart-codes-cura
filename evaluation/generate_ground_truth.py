@@ -1,16 +1,14 @@
 """Generate verified ground truth QA pairs from actual ingested documents."""
 import json
+import os
 import re
+
 import httpx
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 
-SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
-SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_KEY", "")
-OPENAI_KEY = (
-    os.environ.get("OPENAI_API_KEY", "")
-    "wYEk2T3BlbkFJAlR5vrcnkrJcXAv-aN81APnep5Rgmww389sjRZQDBB7P3FmTb_LBCFuomBMEiNI"
-    "pV41SFp_yMA"
-)
+SUPABASE_URL = os.environ["SUPABASE_URL"]
+SUPABASE_KEY = os.environ["SUPABASE_SERVICE_KEY"]
+OPENAI_KEY = os.environ["OPENAI_API_KEY"]
 HEADERS = {
     "apikey": SUPABASE_KEY,
     "Authorization": f"Bearer {SUPABASE_KEY}",
