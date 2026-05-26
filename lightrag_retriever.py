@@ -25,6 +25,17 @@ import os
 import sys
 import glob
 
+# Bridge .streamlit/secrets.toml -> environment vars so this module works
+# outside the Streamlit runtime as well (CLI, scripts, agents).
+try:
+    import config as _project_config
+    for _key in ("OPENAI_API_KEY", "SUPABASE_URL", "SUPABASE_SERVICE_KEY"):
+        _val = getattr(_project_config, _key, "")
+        if _val and not os.environ.get(_key):
+            os.environ[_key] = _val
+except ImportError:
+    pass
+
 # ─── LightRAG Import (with fallback) ───────────────────────────────────────
 
 USE_LIGHTRAG = False
@@ -82,17 +93,33 @@ def get_rag() -> "LightRAG":
 
     import asyncio
 
+    # Current LightRAG signatures:
+    #   openai_complete_if_cache  -- (model, prompt, ...). LightRAG calls it as (prompt, ...).
+    #   openai_embed              -- already an EmbeddingFunc with dim=1536. Wrapping it in
+    #                                our own EmbeddingFunc double-validates and breaks. Use
+    #                                openai_embed.func (raw async fn) instead.
+    LLM_MODEL = "gpt-4o-mini"
+    EMBED_MODEL = "text-embedding-3-large"
+    EMBED_DIM = 3072
+
+    async def _llm_func(prompt: str, **kwargs):
+        kwargs.pop("hashing_kv", None)
+        return await openai_complete_if_cache(LLM_MODEL, prompt, **kwargs)
+
+    _raw_embed = openai_embed.func  # underlying async (texts, model, ...) -> ndarray
+
+    async def _embed_func(texts):
+        return await _raw_embed(texts, model=EMBED_MODEL)
+
     _rag_instance = LightRAG(
         working_dir=INDEX_DIR,
-        llm_model_func=openai_complete_if_cache,
-        llm_model_name="gpt-4o-mini",       # cheaper model for KG extraction
-        llm_model_max_async=4,               # parallel extraction calls
+        llm_model_func=_llm_func,
+        llm_model_name=LLM_MODEL,
+        llm_model_max_async=4,
         embedding_func=EmbeddingFunc(
-            embedding_dim=3072,              # text-embedding-3-large dimension
+            embedding_dim=EMBED_DIM,
             max_token_size=8192,
-            func=lambda texts: openai_embed(
-                texts, model="text-embedding-3-large"
-            ),
+            func=_embed_func,
         ),
     )
 
@@ -165,21 +192,30 @@ def index_documents(source_dir: str) -> dict:
     return stats
 
 
-def index_from_supabase(limit: int = 500) -> dict:
+def index_from_supabase(limit: int = 500, city: str | None = None) -> dict:
     """Pull documents from Supabase and index them into LightRAG.
 
     Useful when the parsed Markdown files are not available locally
     but the data is already in the Supabase vector store.
+
+    Args:
+        limit: Maximum number of chunks to pull (page-collected if needed).
+        city:  Optional metadata->>city filter (e.g. "Atlanta") to scope
+               the index to a single jurisdiction.
     """
     import httpx
 
     rag = get_rag()
 
-    print("Fetching documents from Supabase...")
+    print(f"Fetching documents from Supabase (city={city or 'ALL'})...")
+    params: dict[str, str] = {"select": "content,metadata", "limit": str(limit)}
+    if city:
+        # PostgREST jsonb path filter: metadata->>city = 'Atlanta'
+        params["metadata->>city"] = f"eq.{city}"
     res = httpx.get(
         f"{SUPABASE_URL}/rest/v1/documents",
         headers=SUPABASE_HEADERS,
-        params={"select": "content,metadata", "limit": str(limit)},
+        params=params,
         timeout=60,
     )
 
@@ -386,8 +422,10 @@ if __name__ == "__main__":
         print(f"\nResult: {stats}")
 
     elif command == "index-supabase":
+        # Args: [limit] [city]
         limit = int(sys.argv[2]) if len(sys.argv) > 2 else 500
-        stats = index_from_supabase(limit=limit)
+        city = sys.argv[3] if len(sys.argv) > 3 else None
+        stats = index_from_supabase(limit=limit, city=city)
         print(f"\nResult: {stats}")
 
     elif command == "query":
